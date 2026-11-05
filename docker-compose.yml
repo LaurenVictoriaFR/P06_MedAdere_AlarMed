@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${DB_NAME:-alarmed}
+      POSTGRES_USER: ${DB_USER:-alarmed}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-alarmed}
+    ports:
+      - "5432:5432"
+    volumes:
+      - alarmed-data:/var/lib/postgresql/data
+volumes:
+  alarmed-data:
