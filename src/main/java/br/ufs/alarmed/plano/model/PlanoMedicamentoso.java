@@ -14,6 +14,7 @@ import java.util.UUID;
 
 // Entidade principal do plano medicamentoso (UC-01).
 // Por enquanto só tem os dados basicos
+@Entity
 @Table(name = "plano_medicamentoso")
 public class PlanoMedicamentoso {
 
@@ -32,10 +33,11 @@ public class PlanoMedicamentoso {
     @Column(nullable = false, length = 20)
     private SituacaoPlano situacao;
 
+    // construtor vazio, exigido pelo JPA
     protected PlanoMedicamentoso() {
     }
 
-    // construtor para uso do JPA
+    // construtor usado de verdade, pra criar um plano novo
     public PlanoMedicamentoso(UUID pacienteId) {
         this.pacienteId = Objects.requireNonNull(pacienteId, "pacienteId");
         this.dataInicio = LocalDate.now();
