@@ -4,5 +4,6 @@ package br.ufs.alarmed.plano.model;
 public enum SituacaoPlano {
     EM_EDICAO,
     EM_REVISAO,
-    CONFIRMADO
+    CONFIRMADO,
+    ENCERRADO
 }
