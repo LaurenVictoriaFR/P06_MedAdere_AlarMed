@@ -26,6 +26,12 @@ public class TratadorGlobalDeExcecoes {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErroResposta.de(ex.getMessage()));
     }
 
+    // sem paciente identificado -> 401
+    @ExceptionHandler(NaoAutenticadoException.class)
+    public ResponseEntity<ErroResposta> tratarNaoAutenticado(NaoAutenticadoException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErroResposta.de(ex.getMessage()));
+    }
+
     // dados invalidos no corpo da requisicao -> 400, com o nome do campo que esta errado
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResposta> tratarValidacao(MethodArgumentNotValidException ex) {
