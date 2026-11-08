@@ -1,5 +1,6 @@
 package br.ufs.alarmed.plano.model;
 
+import br.ufs.alarmed.comum.excecao.RegraNegocioException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.Table;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -68,6 +70,17 @@ public class ItemDoPlano {
         this.frequencia = Objects.requireNonNull(frequencia, "frequencia");
         this.duracaoTratamento = Objects.requireNonNull(duracaoTratamento, "duracaoTratamento");
         Objects.requireNonNull(horarios, "horarios");
+
+        // todo medicamento precisa de pelo menos um horario (UC-01, fluxo A1)
+        if (horarios.isEmpty()) {
+            throw new RegraNegocioException("Informe ao menos um horário para o medicamento.");
+        }
+
+        // o mesmo horario duas vezes geraria dose repetida
+        if (new HashSet<>(horarios).size() != horarios.size()) {
+            throw new RegraNegocioException("O mesmo horário foi informado mais de uma vez.");
+        }
+
         for (LocalTime hora : horarios) {
             this.horarios.add(new HorarioProgramado(hora));
         }
