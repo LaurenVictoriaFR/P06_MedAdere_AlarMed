@@ -2,6 +2,7 @@ package br.ufs.alarmed.plano.service;
 
 import br.ufs.alarmed.comum.config.ContextoPaciente;
 import br.ufs.alarmed.comum.excecao.RecursoNaoEncontradoException;
+import br.ufs.alarmed.comum.excecao.RegraNegocioException;
 import br.ufs.alarmed.plano.dto.ItemDoPlanoRequest;
 import br.ufs.alarmed.plano.dto.PlanoResponse;
 import br.ufs.alarmed.plano.model.ItemDoPlano;
@@ -13,8 +14,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// UC-01, passos 1 a 5: comecar o cadastro do plano e colocar/tirar medicamentos dele.
-// Revisao, correcao, confirmacao e cancelamento (UC-08) ficam pro proximo passo.
+// UC-01 e UC-08: comecar o cadastro do plano, colocar/tirar medicamentos, revisar,
+// corrigir, confirmar e cancelar um cadastro que ainda nao foi confirmado.
 @Service
 @Transactional
 public class PlanoMedicamentosoService {
@@ -69,6 +70,37 @@ public class PlanoMedicamentosoService {
         PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
         plano.removerItem(itemId);
         return PlanoResponse.de(plano);
+    }
+
+    // UC-01 passo 6: manda o plano completo pra revisao (UC-08)
+    public PlanoResponse revisarPlano(UUID planoId) {
+        PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        plano.revisarPlano();
+        return PlanoResponse.de(plano);
+    }
+
+    // UC-08 A1: achou erro na revisao e volta pra edicao, com os itens preservados
+    public PlanoResponse editarPlano(UUID planoId) {
+        PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        plano.editarPlano();
+        return PlanoResponse.de(plano);
+    }
+
+    // UC-01 passo 7 / UC-08 passo 3: confirma o plano revisado (RN01)
+    public PlanoResponse confirmarPlano(UUID planoId) {
+        PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        plano.confirmarPlano();
+        return PlanoResponse.de(plano);
+    }
+
+    // desiste do cadastro enquanto ele ainda nao foi confirmado.
+    // depois de CONFIRMADO, cancelar e outro fluxo (UC-04), fora desta entrega.
+    public void cancelarCadastro(UUID planoId) {
+        PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        if (plano.getSituacao() != SituacaoPlano.EM_EDICAO && plano.getSituacao() != SituacaoPlano.EM_REVISAO) {
+            throw new RegraNegocioException("Só é possível cancelar um cadastro que ainda não foi confirmado.");
+        }
+        planoRepository.delete(plano);
     }
 
     // busca o plano garantindo que ele e do paciente logado (UC-06, pos-condicao)
