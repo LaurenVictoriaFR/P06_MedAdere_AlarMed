@@ -62,6 +62,9 @@ public class PlanoMedicamentosoService {
                 request.horarios());
 
         plano.adicionarItem(item);
+        // forca o cascade-persist agora: so assim o item ganha o id antes de virar resposta
+        // (sem isso, o id so sai preenchido no flush de fim de transacao, tarde demais pro DTO)
+        planoRepository.saveAndFlush(plano);
         return PlanoResponse.de(plano);
     }
 
