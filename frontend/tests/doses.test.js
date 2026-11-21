@@ -20,12 +20,15 @@ test('programada antes de T, pendente a partir de T', () => {
   assert.equal(estadoDaDose(dose, null, em(DIA, '08:00')).estado, ESTADOS.PENDENTE);
 });
 
-test('janela de 2 h: T+119 ainda pendente, T+120 vira não tomada automática', () => {
+// Limites do risco R07: 119, 120 e 121 minutos depois do horário.
+test('janela de 2 h: T+119 ainda pendente, T+120 e T+121 viram não tomada automática', () => {
   const { dose } = doseUnica();
   assert.equal(estadoDaDose(dose, null, em(DIA, '09:59')).estado, ESTADOS.PENDENTE);
-  const fim = estadoDaDose(dose, null, em(DIA, '10:00'));
-  assert.equal(fim.estado, ESTADOS.NAO_TOMADA);
-  assert.equal(fim.automatica, true);
+  for (const hora of ['10:00', '10:01']) {
+    const fim = estadoDaDose(dose, null, em(DIA, hora));
+    assert.equal(fim.estado, ESTADOS.NAO_TOMADA);
+    assert.equal(fim.automatica, true);
+  }
 });
 
 test('próxima dose do mesmo medicamento antes de 2 h encurta a janela', () => {

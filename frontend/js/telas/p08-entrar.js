@@ -1,4 +1,4 @@
-// P08 · Entrar / Criar conta (RF009, RF001, UC05).
+// P08 · Entrar / Criar conta (RF009, RF001, UC-05, UC-06).
 // Ajustes em relação à imagem de referência (Plano-Frontend, seção 1):
 // F03 sem "Seus dados estão seguros conosco"; F04 sem "Esqueceu sua senha?";
 // F05 sem "Lembrar meu acesso"; F06 "Usar dados de demonstração" só com ?demo=1.

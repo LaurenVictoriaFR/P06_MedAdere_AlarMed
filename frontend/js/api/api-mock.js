@@ -74,7 +74,7 @@ function dadosDaSessao(fn) {
   return transacao((db) => fn(dadosDe(db, usuarioDaSessao(db).id), db));
 }
 
-// ---------- Conta (RF009, RF001, UC05) ----------
+// ---------- Conta (RF009, RF001, UC-05, UC-06) ----------
 
 export async function sessao() {
   const db = ler();

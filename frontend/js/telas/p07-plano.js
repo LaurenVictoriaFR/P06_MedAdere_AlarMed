@@ -1,4 +1,4 @@
-// P07 · Meu plano (RF010, RN01, UC04).
+// P07 · Meu plano (RF010, RN01, UC-04).
 // Remover e adicionar viram uma alteração pendente; os lembretes seguem o plano
 // confirmado até a revisão no P02. F11: botão "Sair" no cabeçalho.
 

@@ -1,4 +1,4 @@
-// P01 · Cadastro do plano / Adicionar medicamento (RF002, RF008, RN01, UC01, UC04).
+// P01 · Cadastro do plano / Adicionar medicamento (RF002, RF008, RN01, UC-01, UC-04).
 // Sem plano confirmado: cadastro inicial. Com plano: entra como alteração pendente.
 
 import {

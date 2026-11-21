@@ -1,4 +1,4 @@
-// P04 · Painel do mês (RF005, UC03).
+// P04 · Painel do mês (RF005, UC-03).
 // Taxa = tomadas ÷ (tomadas + não tomadas). Dose com 2 estados; dia com 3 agregados (F08).
 // Navegação entre meses (RF005 CA02), que faltava no protótipo.
 

@@ -1,4 +1,4 @@
-// Lembretes no horário da dose (RF003, UC06).
+// Lembretes no horário da dose (RF003, UC-07).
 //
 // Limitação desta versão (só frontend): o aviso é disparado pelo próprio app,
 // então só aparece com o AlarMed aberto ou em segundo plano. Aviso com o app

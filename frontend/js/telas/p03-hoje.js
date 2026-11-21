@@ -1,4 +1,4 @@
-// P03 · Doses de hoje (RF004, RN02, UC02).
+// P03 · Doses de hoje (RF004, RN02, UC-02).
 // Tomei / Não tomei só na janela de 2 h. Corrigir e Desfazer também só na janela.
 
 import { h, cabecalho, botao, botaoTexto, selo, aviso, vazio } from '../ui/componentes.js';

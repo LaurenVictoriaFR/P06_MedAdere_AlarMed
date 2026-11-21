@@ -36,13 +36,13 @@ taxa mensal) e os pares de cor do RNF001, lidos de `css/tokens.css`.
 
 | Tela | Rota | Requisitos |
 |---|---|---|
-| P08 Entrar / Criar conta | `#/entrar` | RF009, RF001, UC05 |
-| P01 Cadastro / Adicionar medicamento | `#/cadastro` | RF002, RF008, RN01, UC01 |
-| P02 Revisão e confirmação | `#/revisao` | RF002, RF010, RN01, RN05 |
-| P03 Doses de hoje | `#/hoje` | RF004, RN02, UC02 |
-| P04 Painel do mês | `#/painel?mes=AAAA-MM` | RF005, UC03 |
-| P07 Meu plano | `#/plano` | RF010, RN01, UC04 |
-| P09 Lembrete (simulação) | `#/notificacao` | RF003, UC06 |
+| P08 Entrar / Criar conta | `#/entrar` | RF009, RF001, UC-05, UC-06 |
+| P01 Cadastro / Adicionar medicamento | `#/cadastro` | RF002, RF008, RN01, UC-01 |
+| P02 Revisão e confirmação | `#/revisao` | RF002, RF010, RN01, RN05, UC-08 |
+| P03 Doses de hoje | `#/hoje` | RF004, RN02, UC-02 |
+| P04 Painel do mês | `#/painel?mes=AAAA-MM` | RF005, UC-03 |
+| P07 Meu plano | `#/plano` | RF010, RN01, UC-04 |
+| P09 Lembrete (simulação) | `#/notificacao` | RF003, UC-07 |
 
 ## Estrutura
 

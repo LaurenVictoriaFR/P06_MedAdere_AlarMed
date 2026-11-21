@@ -1,4 +1,4 @@
-// P02 · Revisão e confirmação (RF002, RF010, RN01, RN05).
+// P02 · Revisão e confirmação (RF002, RF010, RN01, RN05, UC-08).
 // O plano (ou a alteração) só passa a valer depois de "Conferi" + "Confirmar e salvar".
 
 import { h, fragmento, cabecalho, botao, cartaoItem, aviso } from '../ui/componentes.js';

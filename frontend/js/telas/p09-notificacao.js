@@ -1,4 +1,4 @@
-// P09 · Notificação (RF003, UC06). Esta rota é a SIMULAÇÃO da tela de bloqueio,
+// P09 · Notificação (RF003, UC-07). Esta rota é a SIMULAÇÃO da tela de bloqueio,
 // para demonstração e testes de usabilidade. O lembrete de verdade é a
 // notificação do sistema (notificacoes.js); ao tocar nela, abre o P03 com a dose em destaque.
 
