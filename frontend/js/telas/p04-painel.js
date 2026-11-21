@@ -104,7 +104,7 @@ export default {
   aba: 'painel',
 
   async render(ctx) {
-    const { agora, plano, usuario } = ctx;
+    const { agora, plano } = ctx;
     const registros = await ctx.api.listarRegistros();
     const itens = D.todosOsItens(plano);
     const meses = mesesDisponiveis(itens, agora);
@@ -133,10 +133,7 @@ export default {
     };
 
     return h('section', { class: 'tela' },
-      cabecalho({
-        sobretitulo: usuario.perfil === 'cuidador' && usuario.nomePaciente ? `Paciente: ${usuario.nomePaciente}` : null,
-        titulo: 'Painel do mês',
-      }),
+      cabecalho({ titulo: 'Painel do mês' }),
       h('nav', { class: 'mes-nav', 'aria-label': 'Escolher o mês' },
         h('button', {
           type: 'button', class: 'btn-icone', 'aria-label': `Mês anterior, ${mesPorExtenso(anterior)}`,

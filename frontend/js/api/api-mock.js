@@ -9,11 +9,11 @@
 import { relogio } from '../relogio.js';
 import * as P from '../dominio/plano.js';
 import * as D from '../dominio/doses.js';
+import * as C from '../dominio/conta.js';
 import { dataISO, deDataHora, somarDias, somarMinutos } from '../dominio/tempo.js';
-import { ErroApi, MENSAGENS } from './erros.js';
+import { ErroApi, ERROS } from './erros.js';
 
 const CHAVE = 'alarmed:v1';
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 let emMemoria = null; // usado quando o navegador bloqueia o localStorage
 
 function bancoVazio() {
@@ -35,20 +35,23 @@ function gravar(db) {
   try {
     localStorage.setItem(CHAVE, JSON.stringify(db));
   } catch (e) {
-    if (e && e.name === 'QuotaExceededError') throw new ErroApi('armazenamento_cheio', MENSAGENS.armazenamento_cheio);
+    if (e && e.name === 'QuotaExceededError') throw erro('armazenamento_cheio');
   }
 }
 
-function erro(codigo, campos = null) {
-  return new ErroApi(codigo, MENSAGENS[codigo] ?? codigo, campos);
+// Monta o erro no formato do back-end ({ mensagem, camposInvalidos } + status).
+function erro(codigo, camposInvalidos = {}) {
+  const [status, mensagem] = ERROS[codigo] ?? [400, codigo];
+  return new ErroApi(mensagem, { status, camposInvalidos });
 }
 
 function gerarId(prefixo) {
   return `${prefixo}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 }
 
+// Mesmo formato do ContaResponse do back-end.
 function publico(u) {
-  return u ? { id: u.id, nome: u.nome, email: u.email, perfil: u.perfil, nomePaciente: u.nomePaciente ?? null } : null;
+  return u ? { id: u.id, nome: u.nome, email: u.email } : null;
 }
 
 function usuarioDaSessao(db) {
@@ -81,32 +84,22 @@ export async function sessao() {
   return publico(db.usuarios.find((u) => u.id === db.sessao));
 }
 
-export async function criarConta({ nome = '', email = '', senha = '', perfil = '', nomePaciente = '' }) {
-  const limpo = {
-    nome: nome.trim(),
-    email: email.trim().toLowerCase(),
-    perfil,
-    nomePaciente: nomePaciente.trim(),
-  };
-  const campos = {};
-  if (!limpo.nome) campos.nome = 'Escreva seu nome.';
-  if (!['paciente', 'cuidador'].includes(perfil)) campos.perfil = 'Escolha quem vai usar o AlarMed.';
-  if (perfil === 'cuidador' && !limpo.nomePaciente) campos.nomePaciente = 'Escreva o nome de quem você cuida.';
-  if (!EMAIL.test(limpo.email)) campos.email = 'Escreva um e-mail válido, como nome@exemplo.com.';
-  if (senha.length < 6) campos.senha = 'Use pelo menos 6 caracteres.';
-  if (Object.keys(campos).length) throw erro('dados_invalidos', campos);
+// Corpo igual ao CadastroRequest: nome, email, senha, confirmacaoSenha,
+// dataNascimento (AAAA-MM-DD), telefone (opcional) e aceiteTermos.
+export async function criarConta(formulario) {
+  const { valido, erros, dados } = C.validarCadastro(formulario, dataISO(relogio.agora()));
+  if (!valido) throw erro('dados_invalidos', erros);
 
   return transacao((db) => {
-    if (db.usuarios.some((u) => u.email === limpo.email)) {
-      throw erro('email_em_uso', { email: 'Já existe uma conta com este e-mail. Use “Entrar”.' });
-    }
+    if (db.usuarios.some((u) => u.email === dados.email)) throw erro('email_em_uso');
+    // Como no back-end, a confirmação e o aceite só validam o cadastro e não são gravados.
     const usuario = {
       id: gerarId('u'),
-      nome: limpo.nome,
-      email: limpo.email,
-      senha, // texto puro: ver aviso no topo do arquivo
-      perfil,
-      nomePaciente: perfil === 'cuidador' ? limpo.nomePaciente : null,
+      nome: dados.nome,
+      email: dados.email,
+      senha: dados.senha, // texto puro: ver aviso no topo do arquivo
+      dataNascimento: dados.dataNascimento,
+      telefone: dados.telefone,
       criadoEm: relogio.agora().toISOString(),
     };
     db.usuarios.push(usuario);
@@ -116,13 +109,12 @@ export async function criarConta({ nome = '', email = '', senha = '', perfil = '
   });
 }
 
-export async function entrar({ email = '', senha = '' }) {
-  const campos = {};
-  if (!email.trim()) campos.email = 'Escreva o e-mail da conta.';
-  if (!senha) campos.senha = 'Escreva a senha.';
-  if (Object.keys(campos).length) throw erro('dados_invalidos', campos);
+// Corpo igual ao LoginRequest: email e senha.
+export async function entrar(formulario) {
+  const { valido, erros, dados } = C.validarLogin(formulario);
+  if (!valido) throw erro('dados_invalidos', erros);
   return transacao((db) => {
-    const u = db.usuarios.find((x) => x.email === email.trim().toLowerCase() && x.senha === senha);
+    const u = db.usuarios.find((x) => x.email === dados.email && x.senha === dados.senha);
     if (!u) throw erro('credenciais');
     db.sessao = u.id;
     return publico(u);
@@ -215,7 +207,7 @@ export async function desfazerRegistro(idDose) {
 
 // ---------- Demonstração (?demo=1) ----------
 // Conta fictícia com 45 dias de histórico, para os testes de usabilidade.
-// As pessoas são as personas da jornada (Antônio, paciente; Juliana, cuidadora).
+// A conta é do Antônio, a persona paciente da jornada (dados fictícios).
 
 const PADRAO_DEMO = 'TTTPTTTTNTTPTTTT'; // T: todas tomadas; P: parte; N: nenhuma
 
@@ -250,11 +242,11 @@ export async function carregarDemonstracao() {
     db.usuarios = db.usuarios.filter((u) => u.id !== id);
     db.usuarios.push({
       id,
-      nome: 'Juliana',
+      nome: 'Antônio',
       email: 'demo@alarmed.test',
       senha: 'demo1234',
-      perfil: 'cuidador',
-      nomePaciente: 'Antônio',
+      dataNascimento: '1956-05-14',
+      telefone: null,
       criadoEm: relogio.agora().toISOString(),
     });
     db.dados[id] = montarDemonstracao(relogio.agora());

@@ -12,7 +12,7 @@ export default {
   aba: 'plano',
 
   async render(ctx) {
-    const { plano, usuario } = ctx;
+    const { plano } = ctx;
     const pendente = P.temAlteracaoPendente(plano);
     const { itens, removidos } = P.compararAlteracao(plano);
 
@@ -35,7 +35,6 @@ export default {
 
     return h('section', { class: 'tela' },
       cabecalho({
-        sobretitulo: usuario.perfil === 'cuidador' && usuario.nomePaciente ? `Paciente: ${usuario.nomePaciente}` : null,
         titulo: 'Meu plano',
         acoes: botaoTexto({ texto: 'Sair', icone: 'sair', foco: 'sair', aoClicar: () => sairDaConta(ctx) }),
       }),

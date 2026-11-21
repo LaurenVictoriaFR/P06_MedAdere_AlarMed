@@ -29,8 +29,9 @@ cd frontend
 node --test
 ```
 
-Cobrem as regras de domínio (validação do item, RN01, janela de 2 h, dia da dose,
-taxa mensal) e os pares de cor do RNF001, lidos de `css/tokens.css`.
+Cobrem as regras de domínio (cadastro e login do UC-05 e UC-06, validação do item,
+RN01, janela de 2 h, dia da dose, taxa mensal) e os pares de cor do RNF001, lidos
+de `css/tokens.css`. No CI, rodam no job `frontend`.
 
 ## Telas e rotas
 

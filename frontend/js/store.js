@@ -5,7 +5,12 @@ import { formularioVazio } from './dominio/plano.js';
 
 function inicial() {
   return {
-    entrar: { modo: 'entrar', email: '', senha: '', nome: '', perfil: 'paciente', nomePaciente: '', erros: {}, erroGeral: '' },
+    entrar: {
+      modo: 'entrar', email: '', senha: '',
+      // Só em "Criar conta" (UC-05)
+      nome: '', dataNascimento: '', telefone: '', confirmacaoSenha: '', aceiteTermos: false,
+      erros: {}, erroGeral: '',
+    },
     cadastro: { form: formularioVazio(), erros: {}, horaExtra: '', erroHoraExtra: '', erroFoto: '' },
     revisao: { conferido: false },
     painel: { diaSelecionado: null },

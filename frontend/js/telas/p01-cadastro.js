@@ -8,6 +8,7 @@ import {
 import { icone } from '../ui/icones.js';
 import { mostrarToast } from '../ui/toast.js';
 import { reduzirFoto } from '../ui/foto.js';
+import { camposDoErro } from '../api/erros.js';
 import { estadoUi, limparFormularioDoCadastro, sairDaConta } from '../store.js';
 import * as P from '../dominio/plano.js';
 import { dataISO, horaValida } from '../dominio/tempo.js';
@@ -178,12 +179,13 @@ export default {
         mostrarToast(`${P.tituloItem(item)} entrou na lista.`);
         await ctx.atualizar({ focarEm: '#titulo-lista' });
       } catch (e) {
-        if (!e.campos) {
+        const campos = camposDoErro(e);
+        if (!campos) {
           mostrarToast(e.message, { tipo: 'erro' });
           return;
         }
-        estado.erros = e.campos;
-        const primeiro = ORDEM_DOS_ERROS.find((c) => e.campos[c]);
+        estado.erros = campos;
+        const primeiro = ORDEM_DOS_ERROS.find((c) => campos[c]);
         await ctx.atualizar({ focarEm: focoDoErro(primeiro, form) });
       }
     };

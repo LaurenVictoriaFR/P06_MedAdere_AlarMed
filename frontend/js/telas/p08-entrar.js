@@ -2,47 +2,60 @@
 // Ajustes em relação à imagem de referência (Plano-Frontend, seção 1):
 // F03 sem "Seus dados estão seguros conosco"; F04 sem "Esqueceu sua senha?";
 // F05 sem "Lembrar meu acesso"; F06 "Usar dados de demonstração" só com ?demo=1.
+// "Criar conta" segue o UC-05 e o CadastroRequest do back-end. O perfil de
+// cuidador (F12) saiu no P3: o P2 não o define e o back-end não o guarda.
 
-import { h, marca, botao, campo, segmentado, grupoChips, limparErroDoCampo, aviso } from '../ui/componentes.js';
+import { h, marca, botao, campo, segmentado, limparErroDoCampo, mensagemErro, aviso } from '../ui/componentes.js';
 import { icone } from '../ui/icones.js';
 import { estadoUi } from '../store.js';
+import { camposDoErro } from '../api/erros.js';
+import { dataISO, somarDias } from '../dominio/tempo.js';
 
-const PERFIS = [
-  { valor: 'paciente', rotulo: 'Sou o paciente' },
-  { valor: 'cuidador', rotulo: 'Cuido de um paciente' },
+// Ordem dos campos na tela, usada para pôr o foco no primeiro erro.
+const ORDEM_DOS_CAMPOS = ['nome', 'dataNascimento', 'email', 'telefone', 'senha', 'confirmacaoSenha', 'aceiteTermos'];
+
+// Texto curto dos termos de uso, mostrado na própria tela (UC-05).
+const TERMOS = [
+  'O AlarMed é um protótipo acadêmico (COMP0503, UFS). Use apenas dados fictícios.',
+  'O app ajuda a lembrar e a registrar as doses. Ele não substitui a orientação de médicos e farmacêuticos e não verifica interações entre remédios.',
+  'Nesta versão, a senha não é criptografada. Não use uma senha que você usa em outros serviços.',
+  'Os registros mostram o que foi marcado no app. Eles não comprovam que o remédio foi tomado.',
 ];
 
 function demoLiberada() {
   return new URLSearchParams(window.location.search).has('demo');
 }
 
-function campoSenha(estado, { novaSenha }) {
+// Campo de senha com o botão de mostrar e ocultar. `falar` completa o rótulo
+// do botão para o leitor de tela ("Mostrar senha", "Mostrar a confirmação da senha").
+function campoSenha(estado, { id, rotulo, falar, ajuda = null, autocomplete }) {
   const alternar = h('button', {
     type: 'button',
     class: 'campo-acessorio',
-    'aria-label': 'Mostrar senha',
+    'aria-label': `Mostrar ${falar}`,
     'aria-pressed': 'false',
-    'aria-controls': 'senha',
+    'aria-controls': id,
   }, icone('olhoFechado'));
   alternar.addEventListener('click', () => {
-    const entrada = document.getElementById('senha');
+    const entrada = document.getElementById(id);
     const mostrando = entrada.type === 'text';
     entrada.type = mostrando ? 'password' : 'text';
     alternar.setAttribute('aria-pressed', String(!mostrando));
-    alternar.setAttribute('aria-label', mostrando ? 'Mostrar senha' : 'Ocultar senha');
+    alternar.setAttribute('aria-label', `${mostrando ? 'Mostrar' : 'Ocultar'} ${falar}`);
     alternar.replaceChildren(icone(mostrando ? 'olhoFechado' : 'olho'));
   });
   return campo({
-    id: 'senha',
-    rotulo: 'Senha',
-    ajuda: novaSenha ? 'Pelo menos 6 caracteres.' : null,
+    id,
+    rotulo,
+    ajuda,
     tipo: 'password',
     icone: 'cadeado',
-    valor: estado.senha,
-    autocomplete: novaSenha ? 'new-password' : 'current-password',
-    erro: estado.erros.senha,
+    valor: estado[id],
+    autocomplete,
+    erro: estado.erros[id],
     acessorio: alternar,
-    aoDigitar: (e) => { estado.senha = e.target.value; limparErroDoCampo(e.target); },
+    atributos: { maxlength: 100 },
+    aoDigitar: (e) => { estado[id] = e.target.value; limparErroDoCampo(e.target); },
   });
 }
 
@@ -54,6 +67,31 @@ function campoTexto(estado, chave, opcoes) {
     aoDigitar: (e) => { estado[chave] = e.target.value; limparErroDoCampo(e.target); },
     ...opcoes,
   });
+}
+
+// UC-05: o cadastro só termina com o aceite dos termos de uso.
+function aceiteDosTermos(estado) {
+  const erro = estado.erros.aceiteTermos;
+  return h('div', { class: `campo campo-termos${erro ? ' campo-com-erro' : ''}` },
+    h('details', { class: 'termos' },
+      h('summary', {}, 'Ler os termos de uso'),
+      h('ul', { class: 'termos-lista' }, TERMOS.map((t) => h('li', {}, t)))),
+    h('label', { class: `conferencia${estado.aceiteTermos ? ' conferencia-marcada' : ''}`, for: 'aceiteTermos' },
+      h('input', {
+        id: 'aceiteTermos',
+        name: 'aceiteTermos',
+        type: 'checkbox',
+        checked: estado.aceiteTermos,
+        'aria-invalid': erro ? 'true' : null,
+        'aria-describedby': erro ? 'aceiteTermos-erro' : null,
+        onchange: (e) => {
+          estado.aceiteTermos = e.target.checked;
+          e.target.closest('.conferencia').classList.toggle('conferencia-marcada', e.target.checked);
+          limparErroDoCampo(e.target);
+        },
+      }),
+      h('span', {}, 'Li e aceito os termos de uso.')),
+    erro && mensagemErro('aceiteTermos-erro', erro));
 }
 
 // Desktop: foto do casal de fundo, textos por cima e faixa de destaques na base,
@@ -84,19 +122,26 @@ export default {
       try {
         if (criar) {
           await ctx.api.criarConta({
-            nome: estado.nome, email: estado.email, senha: estado.senha,
-            perfil: estado.perfil, nomePaciente: estado.nomePaciente,
+            nome: estado.nome,
+            email: estado.email,
+            senha: estado.senha,
+            confirmacaoSenha: estado.confirmacaoSenha,
+            dataNascimento: estado.dataNascimento,
+            telefone: estado.telefone,
+            aceiteTermos: estado.aceiteTermos,
           });
         } else {
           await ctx.api.entrar({ email: estado.email, senha: estado.senha });
         }
         estado.senha = '';
+        estado.confirmacaoSenha = '';
         ctx.navegar('/');
       } catch (e) {
-        estado.erros = e.campos ?? {};
-        estado.erroGeral = e.campos ? '' : (e.message || 'Não foi possível continuar.');
-        const primeiro = ['perfil', 'nome', 'nomePaciente', 'email', 'senha'].find((c) => estado.erros[c]);
-        await ctx.atualizar({ focarEm: primeiro ? (primeiro === 'perfil' ? '[data-foco^="perfil-"]' : `#${primeiro}`) : '#erro-geral' });
+        const campos = camposDoErro(e);
+        estado.erros = campos ?? {};
+        estado.erroGeral = campos ? '' : (e.message || 'Não foi possível continuar.');
+        const primeiro = ORDEM_DOS_CAMPOS.find((c) => estado.erros[c]);
+        await ctx.atualizar({ focarEm: primeiro ? `#${primeiro}` : '#erro-geral' });
       }
     };
 
@@ -105,27 +150,35 @@ export default {
       ctx.navegar('/hoje');
     };
 
+    const campoEmail = campoTexto(estado, 'email', {
+      rotulo: 'E-mail', tipo: 'email', icone: 'email', autocomplete: 'email', placeholder: 'nome@exemplo.com',
+      atributos: { maxlength: 120 },
+    });
+
     const campos = criar
       ? [
-        grupoChips({
-          id: 'perfil',
-          rotulo: 'Quem vai usar o AlarMed?',
-          opcoes: PERFIS,
-          selecionado: (o) => o.valor === estado.perfil,
-          aoEscolher: (o) => { estado.perfil = o.valor; estado.erros.perfil = null; ctx.atualizar(); },
-          erro: estado.erros.perfil,
+        campoTexto(estado, 'nome', { rotulo: 'Seu nome', icone: 'usuario', autocomplete: 'name', atributos: { maxlength: 120 } }),
+        campoTexto(estado, 'dataNascimento', {
+          rotulo: 'Data de nascimento', tipo: 'date', icone: 'calendario', autocomplete: 'bday',
+          atributos: { min: '1900-01-01', max: somarDias(dataISO(ctx.agora), -1) },
         }),
-        campoTexto(estado, 'nome', { rotulo: 'Seu nome', icone: 'usuario', autocomplete: 'name' }),
-        estado.perfil === 'cuidador' && campoTexto(estado, 'nomePaciente', {
-          rotulo: 'Nome de quem você cuida', icone: 'coracao', autocomplete: 'off',
-          ajuda: 'Aparece no painel que você mostra para a equipe de saúde.',
+        campoEmail,
+        campoTexto(estado, 'telefone', {
+          rotulo: 'Telefone (opcional)', tipo: 'tel', icone: 'celular', autocomplete: 'tel', placeholder: '(79) 99999-0000',
+          atributos: { maxlength: 20, inputmode: 'tel' },
         }),
-        campoTexto(estado, 'email', { rotulo: 'E-mail', tipo: 'email', icone: 'email', autocomplete: 'email', placeholder: 'nome@exemplo.com' }),
-        campoSenha(estado, { novaSenha: true }),
+        campoSenha(estado, {
+          id: 'senha', rotulo: 'Senha', falar: 'senha', autocomplete: 'new-password',
+          ajuda: 'De 8 a 100 caracteres, com letras e números.',
+        }),
+        campoSenha(estado, {
+          id: 'confirmacaoSenha', rotulo: 'Confirme a senha', falar: 'a confirmação da senha', autocomplete: 'new-password',
+        }),
+        aceiteDosTermos(estado),
       ]
       : [
-        campoTexto(estado, 'email', { rotulo: 'E-mail', tipo: 'email', icone: 'email', autocomplete: 'email', placeholder: 'nome@exemplo.com' }),
-        campoSenha(estado, { novaSenha: false }),
+        campoEmail,
+        campoSenha(estado, { id: 'senha', rotulo: 'Senha', falar: 'senha', autocomplete: 'current-password' }),
       ];
 
     const cartao = h('section', { class: 'entrar-cartao', 'aria-labelledby': 'titulo-entrar' },
@@ -150,7 +203,6 @@ export default {
         estado.erroGeral && h('div', { id: 'erro-geral', tabindex: '-1' },
           aviso({ tipo: 'erro', icone: 'alerta', texto: estado.erroGeral, papel: 'alert' })),
         campos,
-        criar && h('p', { class: 'texto-suave pequeno' }, 'A conta pode ser criada pelo paciente ou por quem cuida dele.'),
         botao({
           texto: criar ? 'Criar conta e começar' : 'Entrar',
           icone: criar ? 'usuarioMais' : 'entrar',
