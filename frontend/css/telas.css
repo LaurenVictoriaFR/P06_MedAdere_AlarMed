@@ -1,0 +1,957 @@
+/* Layout geral, ajustes por tela e breakpoints.
+   Celular < 600 px: coluna única e abas embaixo.
+   Tablet 600–1023 px: coluna central de até 640 px.
+   Desktop ≥ 1024 px: trilho lateral de navegação e conteúdo de até 720 px. */
+
+main {
+  display: block;
+}
+
+main:focus {
+  outline: none;
+}
+
+.tela {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px 20px 32px;
+}
+
+body.com-abas main {
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+.nota {
+  padding: 14px 16px;
+  border-radius: var(--raio-item);
+  background: var(--neutro-2);
+  color: var(--texto);
+  font-size: var(--t-pequeno);
+}
+
+/* ---------- P08 Entrar ---------- */
+body[data-tela="entrar"] {
+  background-image:
+    radial-gradient(80% 45% at 110% -10%, rgba(140, 186, 150, 0.45) 0, rgba(140, 186, 150, 0.45) 45%, rgba(140, 186, 150, 0) 72%),
+    radial-gradient(70% 40% at -15% 108%, rgba(140, 186, 150, 0.40) 0, rgba(140, 186, 150, 0.40) 42%, rgba(140, 186, 150, 0) 72%);
+}
+
+.entrar {
+  min-height: 100dvh;
+  padding: 24px 12px 32px;
+}
+
+.entrar-conteudo {
+  display: grid;
+  justify-items: center;
+  align-items: start;
+}
+
+.entrar-hero,
+.entrar-foto,
+.entrar-enfeite {
+  display: none;
+}
+
+.entrar-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px 20px 24px;
+  border: 1px solid var(--borda);
+  border-radius: 28px;
+  background: var(--superficie);
+  box-shadow: 0 20px 50px rgba(12, 69, 52, 0.12);
+}
+
+.entrar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.entrar-form .btn {
+  margin-top: 4px;
+}
+
+.entrar-demo .btn {
+  font-size: var(--t-corpo);
+}
+
+.divisor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  color: var(--texto-suave);
+  font-size: var(--t-pequeno);
+}
+
+.divisor::before,
+.divisor::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--borda);
+}
+
+.entrar-nota {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--texto-suave);
+  font-size: var(--t-pequeno);
+  text-align: center;
+}
+
+.hero-frase {
+  max-width: 30ch;
+  color: var(--texto-forte);
+  font-size: clamp(1.25rem, 2.9vh, 1.875rem);
+  line-height: 1.25;
+}
+
+.hero-coracao {
+  width: 30px;
+  height: 30px;
+  margin-left: 6ch;
+  color: var(--verde-medio);
+}
+
+.hero-destaques {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  max-width: 640px;
+  padding: 16px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  background: rgba(253, 249, 244, 0.88);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(12, 69, 52, 0.14);
+  list-style: none;
+}
+
+.hero-destaques li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--texto);
+  font-size: var(--t-pequeno);
+  text-align: center;
+}
+
+.hero-destaques li + li {
+  border-left: 1px solid var(--borda);
+}
+
+.hero-destaques .icone {
+  width: 30px;
+  height: 30px;
+  color: var(--verde-medio);
+}
+
+@media (min-width: 600px) {
+  .entrar {
+    padding: 40px 24px;
+  }
+
+  .entrar-conteudo {
+    align-items: center;
+    min-height: calc(100dvh - 80px);
+  }
+
+  .entrar-cartao {
+    padding: 36px 32px 28px;
+  }
+}
+
+/* ---------- P03 Doses de hoje ---------- */
+.regra-janela {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--texto-suave);
+  font-size: var(--t-pequeno);
+}
+
+.regra-janela .icone {
+  margin-top: 1px;
+}
+
+.lista-doses {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cartao-dose {
+  --cor-estado: #A9B3AE;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 16px 18px;
+  border: 1px solid var(--borda);
+  border-left: 6px solid var(--cor-estado);
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-leve);
+  scroll-margin: 96px 0;
+}
+
+.cartao-dose.estado-pendente { --cor-estado: #C98A2E; }
+.cartao-dose.estado-tomada { --cor-estado: var(--verde); }
+.cartao-dose.estado-nao_tomada { --cor-estado: #B54848; }
+
+.cartao-dose.destaque {
+  outline: 3px solid var(--verde);
+  outline-offset: 3px;
+}
+
+.dose-topo {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.dose-hora {
+  min-width: 70px;
+  color: var(--texto-forte);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dose-textos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+.dose-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.dose-detalhe {
+  color: var(--texto-suave);
+  font-size: var(--t-pequeno);
+}
+
+.dose-acoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dose-acoes .btn {
+  gap: 6px;
+  padding: 0 10px;
+  font-size: var(--t-corpo);
+  white-space: nowrap;
+}
+
+.dose-acoes .btn .icone {
+  width: 20px;
+  height: 20px;
+}
+
+.cartao-dose > .btn-texto {
+  align-self: flex-start;
+}
+
+/* ---------- P01 Cadastro ---------- */
+.linha-outro-horario {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.linha-outro-horario .campo {
+  flex: 1;
+  min-width: 0;
+}
+
+.linha-outro-horario .btn {
+  flex: none;
+  min-height: 56px;
+  padding: 0 20px;
+}
+
+.linha-outro-horario:has(.campo-erro) {
+  align-items: flex-start;
+}
+
+.linha-outro-horario:has(.campo-erro) .btn {
+  margin-top: 30px;
+}
+
+.bloco-duracao {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.seletor-foto {
+  cursor: pointer;
+}
+
+.bloco-foto:focus-within .seletor-foto {
+  outline: 3px solid var(--foco);
+  outline-offset: 3px;
+}
+
+.foto-previa {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.foto-previa img {
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.foto-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.foto-acoes .btn {
+  min-height: 48px;
+  font-size: 1rem;
+}
+
+/* ---------- P04 Painel ---------- */
+.mes-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-pilula);
+  background: var(--superficie);
+}
+
+.mes-nav .btn-icone {
+  border-radius: 50%;
+}
+
+.mes-atual {
+  color: var(--texto-forte);
+  font-size: var(--t-grande);
+  font-weight: 700;
+}
+
+.cartao-taxa {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cartao-taxa-titulo {
+  color: var(--texto-suave);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.taxa-numero {
+  color: var(--texto-forte);
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.taxa-barra {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--neutro);
+}
+
+.taxa-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: var(--verde);
+}
+
+.cartao-calendario {
+  padding: 14px 10px 16px;
+}
+
+.calendario {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px;
+  table-layout: fixed;
+}
+
+.calendario th {
+  padding-bottom: 2px;
+  color: var(--texto-suave);
+  font-size: var(--t-legenda);
+  font-weight: 700;
+}
+
+.calendario td {
+  padding: 0;
+}
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--texto-forte);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+button.dia:hover {
+  filter: brightness(0.96);
+}
+
+.dia-marcador {
+  stroke-width: 3;
+}
+
+.dia-todas { background: var(--dia-todas); border-color: var(--dia-todas); color: var(--dia-todas-texto); }
+.dia-parte { background: var(--dia-parte); border-color: var(--dia-parte-borda); color: var(--dia-parte-texto); }
+.dia-nenhuma { background: var(--dia-nenhuma); border-color: var(--dia-nenhuma-borda); color: var(--dia-nenhuma-texto); }
+.dia-sem_doses { background: var(--neutro); color: var(--texto-suave); font-weight: 400; }
+.dia-futuro,
+.dia-em_andamento { background: var(--campo); border-color: var(--borda); color: var(--texto); font-weight: 400; }
+
+.dia-hoje {
+  box-shadow: inset 0 0 0 2px var(--texto-forte);
+  font-weight: 700;
+}
+
+.dia-selecionado {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 14px 4px 0;
+  padding: 0;
+  font-size: var(--t-pequeno);
+  list-style: none;
+}
+
+.legenda li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amostra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+}
+
+.amostra .icone {
+  stroke-width: 3;
+}
+
+.detalhe-dia {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lista-simples {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.linha-dose {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.linha-dose-hora {
+  min-width: 52px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.linha-dose-nome {
+  flex: 1;
+  min-width: 10ch;
+}
+
+/* ---------- P09 Notificação (simulação) ---------- */
+body[data-tela="notificacao"] {
+  background: #141A18;
+}
+
+.bloqueio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 100dvh;
+  padding: 72px 16px 32px;
+  background: linear-gradient(180deg, #25312C 0%, #141A18 100%);
+  color: #fff;
+}
+
+.bloqueio-data {
+  color: #D7DEDA;
+  font-size: var(--t-grande);
+}
+
+.bloqueio-hora {
+  font-size: 4.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.notificacao {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 40px;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(245, 239, 229, 0.97);
+  color: var(--texto-forte);
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.notificacao img {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.notificacao-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notificacao-app {
+  color: var(--texto-suave);
+  font-size: var(--t-legenda);
+}
+
+.notificacao-titulo {
+  font-size: var(--t-grande);
+  font-weight: 700;
+}
+
+.notificacao:focus-visible {
+  outline-color: #9FD8BE;
+}
+
+.bloqueio-legenda,
+.bloqueio-vazio {
+  margin: 24px 0 8px;
+  color: #B8C2BD;
+  font-size: var(--t-pequeno);
+  text-align: center;
+}
+
+.bloqueio .btn-secundario {
+  background: transparent;
+  border-color: #9FD8BE;
+  color: #fff;
+}
+
+.bloqueio-voltar {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  margin-top: 8px;
+  color: #9FD8BE;
+  font-weight: 700;
+}
+
+/* ---------- Guia de estilo ---------- */
+.linha-selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.grade-icones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.grade-icones li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px;
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--verde-medio);
+  font-size: var(--t-legenda);
+}
+
+.grade-icones code {
+  color: var(--texto);
+}
+
+.tabela-rolavel {
+  overflow-x: auto;
+}
+
+.tabela-contraste {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-pequeno);
+}
+
+.tabela-contraste th,
+.tabela-contraste td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--borda);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.amostra-par {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.tabela-contraste .ok { color: var(--tomada-texto); font-weight: 700; }
+.tabela-contraste .falha { color: var(--erro); font-weight: 700; }
+
+/* ---------- Tablet ---------- */
+@media (min-width: 600px) {
+  .tela {
+    padding: 40px 24px 40px;
+  }
+
+  .cartao-calendario {
+    padding: 18px 16px 20px;
+  }
+
+  .calendario {
+    border-spacing: 6px;
+  }
+
+  .dia {
+    min-height: 56px;
+    font-size: var(--t-grande);
+  }
+
+  .aviso-acoes {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .aviso-acoes .btn {
+    width: auto;
+    margin-top: 8px;
+  }
+}
+
+/* ---------- Desktop ---------- */
+@media (min-width: 1024px) {
+  .tela {
+    max-width: 720px;
+    padding: 48px 32px;
+  }
+
+  .abas {
+    top: 0;
+    right: auto;
+    width: var(--largura-trilho);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 28px 16px;
+    border-top: none;
+    border-right: 1px solid var(--borda);
+  }
+
+  .abas-marca {
+    display: block;
+    padding: 0 8px;
+  }
+
+  .abas-lista {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    max-width: none;
+    margin: 0;
+  }
+
+  .aba {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    min-height: 56px;
+    padding: 0 8px;
+    font-size: var(--t-corpo);
+  }
+
+  .aba-icone {
+    width: 48px;
+  }
+
+  body.com-abas main {
+    margin-left: var(--largura-trilho);
+    padding-bottom: 32px;
+  }
+
+  .rodape-acoes {
+    padding-bottom: 20px;
+  }
+
+  /* ---------- P08 no desktop: foto do casal de fundo, como na imagem de referência ----------
+     login-fundo.webp é a foto do casal com parede estendida em cima, à direita e embaixo.
+     A altura acompanha a tela: as cabeças ficam a ~36% da altura, abaixo dos textos,
+     e o cartão fica sobre a parede à direita. As bordas da imagem terminam na cor
+     da parede, que é também o fundo da página, então não há emenda. */
+  body[data-tela="entrar"] {
+    background: var(--parede);
+  }
+
+  .entrar {
+    --pad: clamp(32px, 4vw, 56px);
+    --cartao: clamp(400px, 34vw, 460px);
+    --max: 1240px;
+    --parede: #EBDDCF;
+    /* Em telas mais estreitas, a foto anda para a esquerda para o cartão não cobrir a senhora */
+    --desloc: calc(-1 * clamp(0px, (1440px - 100vw) * 0.35, 150px));
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    overflow: clip; /* sem criar área de rolagem, para o position: sticky da coluna da esquerda funcionar */
+    padding: 0;
+    background: var(--parede);
+  }
+
+  /* Ondas verdes na base. Foto, ondas e enfeites ficam fixos na tela;
+     quando o formulário "Criar conta" é mais alto que a tela, só o cartão rola. */
+  .entrar::before,
+  .entrar::after {
+    content: "";
+    position: fixed;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  .entrar::before {
+    right: -20%;
+    bottom: -9vh;
+    left: 35%;
+    height: 26vh;
+    background: linear-gradient(180deg, rgba(176, 208, 182, 0.9), rgba(140, 186, 150, 0.95));
+  }
+
+  .entrar::after {
+    right: 30%;
+    bottom: -12vh;
+    left: -20%;
+    height: 26vh;
+    background: linear-gradient(180deg, #4C9168, #2C6F4C);
+  }
+
+  .entrar-foto {
+    display: block;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: var(--desloc);
+    height: 100dvh;
+    aspect-ratio: 2192 / 1732;
+  }
+
+  .entrar-foto img {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Mancha verde suave atrás do cartão, como na referência */
+  .entrar-conteudo::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -10%;
+    right: -12%;
+    width: 60%;
+    height: 90%;
+    background: radial-gradient(closest-side, rgba(150, 190, 158, 0.45), rgba(150, 190, 158, 0));
+    pointer-events: none;
+  }
+
+  .entrar-enfeite {
+    display: block;
+    position: fixed;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .enfeite-coracao {
+    top: 2vh;
+    right: calc(max(0px, (100% - var(--max)) / 2) + var(--pad) + 40px);
+    width: clamp(110px, 17vh, 170px);
+    height: auto;
+    color: var(--verde-medio);
+    opacity: 0.3;
+    stroke-width: 1.4;
+  }
+
+  .enfeite-folhas {
+    right: max(16px, calc((100% - var(--max)) / 2 - 40px));
+    bottom: 1vh;
+    width: clamp(110px, 18vh, 180px);
+    height: auto;
+    color: #3F8A5F;
+    opacity: 0.85;
+  }
+
+  .entrar-conteudo {
+    position: relative;
+    z-index: 3;
+    grid-template-columns: minmax(0, 1fr) var(--cartao);
+    gap: var(--pad);
+    align-items: stretch;
+    justify-items: stretch;
+    max-width: var(--max);
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 0 var(--pad);
+  }
+
+  .entrar-hero {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 32px;
+    height: 100dvh;
+    min-width: 0;
+    padding: clamp(28px, 5vh, 48px) 0 clamp(20px, 4vh, 36px);
+  }
+
+  .hero-topo {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 1.8vh, 18px);
+  }
+
+  .entrar-hero .marca-grande .marca-simbolo {
+    width: clamp(72px, 10vh, 104px);
+  }
+
+  .entrar-hero .marca-grande .marca-nome {
+    font-size: clamp(2.75rem, 7vh, 4.25rem);
+  }
+
+  .entrar-hero .marca-grande .marca-slogan {
+    font-size: clamp(1.0625rem, 2.3vh, 1.375rem);
+  }
+
+  .entrar-hero .marca-curva {
+    margin-left: 10%;
+    width: clamp(150px, 22vh, 220px);
+  }
+
+  .entrar-cartao {
+    align-self: center;
+    justify-self: end;
+    margin: clamp(28px, 5vh, 48px) 0;
+  }
+
+  .entrar-hero .hero-frase {
+    max-width: 34ch;
+  }
+}
+
+/* Telas baixas: o coração sai para não encostar nas cabeças,
+   e a faixa de destaques fica mais compacta para não cobrir o celular */
+@media (min-width: 1024px) and (max-height: 860px) {
+  .entrar-hero .hero-coracao {
+    display: none;
+  }
+
+  .entrar-hero .hero-destaques {
+    padding: 10px 6px;
+  }
+
+  .entrar-hero .hero-destaques li {
+    gap: 4px;
+    font-size: var(--t-legenda);
+    line-height: 1.3;
+  }
+
+  .entrar-hero .hero-destaques .icone {
+    width: 24px;
+    height: 24px;
+  }
+}
