@@ -20,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 
 // Testes de integracao dos endpoints de /planos (UC-01, UC-08), subindo o contexto
 // completo (controller + service + repository + banco H2) e autenticando via sessao (ContextoPacienteViaSessao).
+// Cada teste usa um paciente real, criado por POST /contas, por causa da chave estrangeira do plano.
 // Cada teste roda numa transacao que e desfeita no final, pra um nao sujar o outro.
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,7 +41,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void iniciarCadastroCriaPlanoEmEdicao() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
 
         mockMvc.perform(post("/planos").sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isOk())
@@ -50,7 +51,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void iniciarCadastroDuasVezesRetomaOMesmoRascunho() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
 
         UUID primeiroId = criarPlano(pacienteId);
         UUID segundoId = criarPlano(pacienteId);
@@ -60,15 +61,15 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void buscarPlanoDeOutroPacienteRetorna404() throws Exception {
-        UUID planoId = criarPlano(UUID.randomUUID());
+        UUID planoId = criarPlano(criarPaciente());
 
-        mockMvc.perform(get("/planos/{id}", planoId).sessionAttr(ContaController.CHAVE_SESSAO, UUID.randomUUID()))
+        mockMvc.perform(get("/planos/{id}", planoId).sessionAttr(ContaController.CHAVE_SESSAO, criarPaciente()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void adicionarItemComDadosInvalidosRetorna400() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
 
         String corpoInvalido = """
@@ -91,7 +92,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void adicionarEDepoisRemoverItem() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
 
         String resposta = adicionarItemLosartana(pacienteId, planoId);
@@ -106,7 +107,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
     @Test
     void confirmarSemRevisarAntesRetorna409() throws Exception {
         // RN01, via HTTP: nao da pra pular a revisao
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
 
@@ -116,7 +117,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void fluxoCompletoAteConfirmar() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
 
@@ -131,7 +132,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void editarVoltaDaRevisaoParaEdicao() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
         mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
@@ -143,7 +144,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void cancelarCadastroEmEdicaoApagaOPlano() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
 
         mockMvc.perform(delete("/planos/{id}", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
@@ -155,7 +156,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void cancelarPlanoConfirmadoRetorna409() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
         mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
@@ -167,7 +168,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void planoAtualSemPlanoConfirmadoRetorna404() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         // so existe um rascunho, que ainda nao conta como plano atual
         criarPlano(pacienteId);
 
@@ -177,7 +178,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void planoAtualDevolveOPlanoConfirmado() throws Exception {
-        UUID pacienteId = UUID.randomUUID();
+        UUID pacienteId = criarPaciente();
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
         mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
@@ -192,14 +193,14 @@ class PlanoMedicamentosoControllerIntegrationTest {
 
     @Test
     void planoAtualNaoMostraPlanoDeOutroPaciente() throws Exception {
-        UUID donoDoPlano = UUID.randomUUID();
+        UUID donoDoPlano = criarPaciente();
         UUID planoId = criarPlano(donoDoPlano);
         adicionarItemLosartana(donoDoPlano, planoId);
         mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, donoDoPlano));
         mockMvc.perform(post("/planos/{id}/confirmar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, donoDoPlano));
 
         // outro paciente logado nao enxerga o plano confirmado do primeiro
-        mockMvc.perform(get("/planos/atual").sessionAttr(ContaController.CHAVE_SESSAO, UUID.randomUUID()))
+        mockMvc.perform(get("/planos/atual").sessionAttr(ContaController.CHAVE_SESSAO, criarPaciente()))
                 .andExpect(status().isNotFound());
     }
 
@@ -207,6 +208,30 @@ class PlanoMedicamentosoControllerIntegrationTest {
     void planoAtualSemSessaoRetorna401() throws Exception {
         mockMvc.perform(get("/planos/atual"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    // cria uma conta de verdade (POST /contas) e devolve o id do paciente dela.
+    // precisa ser um paciente real porque o plano tem chave estrangeira pra tabela paciente (TD-04).
+    // o email muda a cada chamada pra nao bater na regra de "Email ja cadastrado".
+    private UUID criarPaciente() throws Exception {
+        String email = "paciente-" + UUID.randomUUID() + "@teste.com";
+        String corpo = """
+                {
+                  "nome": "Maria Teste",
+                  "email": "%s",
+                  "senha": "remedio2026",
+                  "confirmacaoSenha": "remedio2026",
+                  "dataNascimento": "1956-05-14",
+                  "aceiteTermos": true
+                }
+                """.formatted(email);
+
+        String resposta = mockMvc.perform(post("/contas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return UUID.fromString(objectMapper.readTree(resposta).get("id").asText());
     }
 
     private UUID criarPlano(UUID pacienteId) throws Exception {
