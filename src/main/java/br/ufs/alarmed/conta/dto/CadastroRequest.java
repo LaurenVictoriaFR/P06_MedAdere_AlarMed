@@ -21,7 +21,7 @@ public record CadastroRequest(
 
 		@NotBlank(message = "Informe o email do usuário.") 
 		@Size(max = 120, message = "O email pode ter no máximo 120 caracteres.") 
-		@Email(message = "Informe um e-mail válido.") 
+		@Email(message = "Informe um email válido.") 
 		String email,
 
 		@NotBlank(message = "Informe a senha do usuário.") 
