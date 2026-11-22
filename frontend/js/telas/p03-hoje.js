@@ -19,10 +19,10 @@ function detalhe(d, agora) {
   if (d.estado === D.ESTADOS.TOMADA) return `Registrada às ${horaHM(d.registradoEm)}`;
   if (d.estado === D.ESTADOS.NAO_TOMADA) {
     return d.automatica
-      ? `Sem registro até ${horaHM(d.fimJanela)}. O prazo terminou.`
+      ? `Sem registro até ${horaHM(d.registrarAte)}. O prazo terminou.`
       : `Marcada às ${horaHM(d.registradoEm)}`;
   }
-  if (d.estado === D.ESTADOS.PENDENTE) return `Registre até as ${horaHM(d.fimJanela)} · ${tempoRestante(d.fimJanela - agora)}`;
+  if (d.estado === D.ESTADOS.PENDENTE) return `Registre até as ${horaHM(d.registrarAte)} · ${tempoRestante(d.registrarAte - agora)}`;
   return `Lembrete às ${d.hora}`;
 }
 
