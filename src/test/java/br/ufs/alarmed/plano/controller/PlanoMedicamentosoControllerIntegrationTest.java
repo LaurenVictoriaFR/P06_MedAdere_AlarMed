@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import br.ufs.alarmed.comum.config.ContextoPacienteViaCabecalho;
+import br.ufs.alarmed.conta.controller.ContaController;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 // Testes de integracao dos endpoints de /planos (UC-01, UC-08), subindo o contexto
-// completo (controller + service + repository + banco H2) e autenticando via cabecalho.
+// completo (controller + service + repository + banco H2) e autenticando via sessao (ContextoPacienteViaSessao).
 // Cada teste roda numa transacao que e desfeita no final, pra um nao sujar o outro.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 class PlanoMedicamentosoControllerIntegrationTest {
-
-    private static final String CABECALHO = ContextoPacienteViaCabecalho.CABECALHO;
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,7 +33,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void iniciarCadastroSemCabecalhoRetorna401() throws Exception {
+    void iniciarCadastroSemSessaoRetorna401() throws Exception {
         mockMvc.perform(post("/planos"))
                 .andExpect(status().isUnauthorized());
     }
@@ -44,7 +42,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
     void iniciarCadastroCriaPlanoEmEdicao() throws Exception {
         UUID pacienteId = UUID.randomUUID();
 
-        mockMvc.perform(post("/planos").header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(post("/planos").sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.situacao").value("EM_EDICAO"))
                 .andExpect(jsonPath("$.itens").isEmpty());
@@ -64,7 +62,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
     void buscarPlanoDeOutroPacienteRetorna404() throws Exception {
         UUID planoId = criarPlano(UUID.randomUUID());
 
-        mockMvc.perform(get("/planos/{id}", planoId).header(CABECALHO, UUID.randomUUID().toString()))
+        mockMvc.perform(get("/planos/{id}", planoId).sessionAttr(ContaController.CHAVE_SESSAO, UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 
@@ -84,7 +82,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
                 """;
 
         mockMvc.perform(post("/planos/{id}/itens", planoId)
-                        .header(CABECALHO, pacienteId.toString())
+                        .sessionAttr(ContaController.CHAVE_SESSAO, pacienteId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(corpoInvalido))
                 .andExpect(status().isBadRequest())
@@ -100,7 +98,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
         UUID itemId = UUID.fromString(objectMapper.readTree(resposta).get("itens").get(0).get("id").asText());
 
         mockMvc.perform(delete("/planos/{id}/itens/{itemId}", planoId, itemId)
-                        .header(CABECALHO, pacienteId.toString()))
+                        .sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itens").isEmpty());
     }
@@ -112,7 +110,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
 
-        mockMvc.perform(post("/planos/{id}/confirmar", planoId).header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(post("/planos/{id}/confirmar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isConflict());
     }
 
@@ -122,11 +120,11 @@ class PlanoMedicamentosoControllerIntegrationTest {
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
 
-        mockMvc.perform(post("/planos/{id}/revisar", planoId).header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.situacao").value("EM_REVISAO"));
 
-        mockMvc.perform(post("/planos/{id}/confirmar", planoId).header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(post("/planos/{id}/confirmar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.situacao").value("CONFIRMADO"));
     }
@@ -136,9 +134,9 @@ class PlanoMedicamentosoControllerIntegrationTest {
         UUID pacienteId = UUID.randomUUID();
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
-        mockMvc.perform(post("/planos/{id}/revisar", planoId).header(CABECALHO, pacienteId.toString()));
+        mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
 
-        mockMvc.perform(post("/planos/{id}/editar", planoId).header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(post("/planos/{id}/editar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.situacao").value("EM_EDICAO"));
     }
@@ -148,10 +146,10 @@ class PlanoMedicamentosoControllerIntegrationTest {
         UUID pacienteId = UUID.randomUUID();
         UUID planoId = criarPlano(pacienteId);
 
-        mockMvc.perform(delete("/planos/{id}", planoId).header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(delete("/planos/{id}", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/planos/{id}", planoId).header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(get("/planos/{id}", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isNotFound());
     }
 
@@ -160,15 +158,15 @@ class PlanoMedicamentosoControllerIntegrationTest {
         UUID pacienteId = UUID.randomUUID();
         UUID planoId = criarPlano(pacienteId);
         adicionarItemLosartana(pacienteId, planoId);
-        mockMvc.perform(post("/planos/{id}/revisar", planoId).header(CABECALHO, pacienteId.toString()));
-        mockMvc.perform(post("/planos/{id}/confirmar", planoId).header(CABECALHO, pacienteId.toString()));
+        mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
+        mockMvc.perform(post("/planos/{id}/confirmar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
 
-        mockMvc.perform(delete("/planos/{id}", planoId).header(CABECALHO, pacienteId.toString()))
+        mockMvc.perform(delete("/planos/{id}", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andExpect(status().isConflict());
     }
 
     private UUID criarPlano(UUID pacienteId) throws Exception {
-        String resposta = mockMvc.perform(post("/planos").header(CABECALHO, pacienteId.toString()))
+        String resposta = mockMvc.perform(post("/planos").sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andReturn().getResponse().getContentAsString();
         return UUID.fromString(objectMapper.readTree(resposta).get("id").asText());
     }
@@ -186,7 +184,7 @@ class PlanoMedicamentosoControllerIntegrationTest {
                 """;
 
         return mockMvc.perform(post("/planos/{id}/itens", planoId)
-                        .header(CABECALHO, pacienteId.toString())
+                        .sessionAttr(ContaController.CHAVE_SESSAO, pacienteId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(corpo))
                 .andExpect(status().isOk())

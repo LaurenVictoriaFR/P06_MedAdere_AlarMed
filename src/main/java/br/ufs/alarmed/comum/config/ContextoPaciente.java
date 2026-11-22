@@ -4,9 +4,8 @@ import java.util.UUID;
 
 // Diz quem e o paciente da requisicao atual.
 // Os services so conversam com esta interface, nunca com o login diretamente.
-// Hoje quem responde e o ContextoPacienteViaCabecalho (provisorio).
-// Quando o login do Bloco B (UC-06) ficar pronto, basta criar outra classe que
-// implemente esta interface lendo a sessao de verdade, e apagar a provisoria.
+// Quem responde e o ContextoPacienteViaSessao, que le a sessao aberta no login (UC-06).
+// Trocar a implementacao nao exige mexer nos services.
 public interface ContextoPaciente {
 
     // devolve o id do paciente logado, ou lanca NaoAutenticadoException se nao houver
