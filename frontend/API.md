@@ -8,19 +8,19 @@ tabelas abaixo e troque a linha de `api.js`.
 Este arquivo registra o contrato **do back-end** onde ele já existe e a
 **proposta do front** onde ainda não existe.
 
-## Situação em 21/11/2026
+## Situação em 22/11/2026
 
 | Parte | Back-end | Onde |
 |---|---|---|
-| Conta e login (UC-05, UC-06) | DTOs e service prontos, ainda sem controller | branch `feature/conta-login` |
-| Plano e revisão (UC-01, UC-08) | Pronto | `main` (PR #2) |
+| Conta e login (UC-05, UC-06) | Pronto | `main` (PR #4) |
+| Plano e revisão (UC-01, UC-08), com o plano atual | Pronto | `main` (PRs #2, #5 e #6) |
 | Alterar plano (UC-04) | Não existe | P4 |
 | Doses e registros (UC-02), painel (UC-03), lembrete por push (UC-07) | Não existe | Bloco D |
 
 ## Convenções do back-end
 
 - **Rotas sem prefixo** (`/contas`, `/planos`, ...).
-- **Identificação provisória:** toda chamada do plano leva o cabeçalho `X-Paciente-Id` com o UUID do paciente. Sem ele, a resposta é 401. [a confirmar] O `id` devolvido no login é o que vai nesse cabeçalho?
+- **Identificação pela sessão:** `POST /contas` e `POST /login` abrem uma sessão HTTP (cookie `JSESSIONID`) com o id do paciente. As rotas do plano usam essa sessão. Sem ela, a resposta é 401 "Paciente não identificado. Faça login.". O `api-http.js` precisa mandar o cookie em toda chamada (`fetch(url, { credentials: 'include' })`). A sessão fica na memória do servidor: se ele reiniciar, é preciso entrar de novo.
 - **Erro**, em qualquer rota (`ErroResposta.java`):
 
   ```json
@@ -44,7 +44,7 @@ Este arquivo registra o contrato **do back-end** onde ele já existe e a
 |---|---|---|---|
 | `criarConta(dados)` | `POST /contas` | `CadastroRequest` | `ContaResponse` |
 | `entrar({ email, senha })` | `POST /login` | `LoginRequest` | `ContaResponse` ou 401 `"Email ou senha inválidos."` |
-| `sessao()`, `sair()` | (sem rota) | | O back-end ainda não tem sessão. O front guarda a conta no aparelho |
+| `sessao()`, `sair()` | (sem rota) | | Não há rota para consultar a sessão nem para sair. O front guarda a conta no aparelho e, ao sair, só a esquece. A rota de logout fica para o P4 (decisão de 22/11/2026) |
 
 ```jsonc
 // CadastroRequest (dados fictícios)
@@ -67,11 +67,12 @@ As validações e as mensagens estão repetidas em `js/dominio/conta.js`, com te
 - A data de nascimento precisa estar no passado.
 - O aceite dos termos é obrigatório.
 
-Duas regras ficam no service e voltam como 409:
+Três regras ficam no service e voltam como 409:
 - `"A confirmação da senha não confere"`. O front também a checa no próprio campo, antes de enviar.
 - `"Email já cadastrado."`
+- `"A senha é longa demais: o limite é de 72 bytes (letras acentuadas ocupam mais de 1)."`. O BCrypt só aceita até 72 bytes. O front também a checa no próprio campo.
 
-A senha fica sem hash (ADR-04, RNF004 adiado). Use só dados fictícios.
+O back-end guarda a senha como hash BCrypt (ADR-04 revisada, PR #7). Não há bloqueio de tentativas. Use só dados fictícios.
 
 ## Plano (UC-01, UC-08)
 
@@ -80,6 +81,7 @@ A `situacao` vai de `EM_EDICAO` para `EM_REVISAO` e depois para `CONFIRMADO`. H�
 
 | Momento na tela | Rota | Função no front |
 |---|---|---|
+| Abrir o app | `GET /planos/atual`: plano confirmado do paciente, ou 404 "Nenhum plano confirmado." | `obterPlano()` |
 | Abrir o P01 sem plano confirmado | `POST /planos`: cria ou retoma o rascunho (`EM_EDICAO`) | `obterPlano()` |
 | "Adicionar à lista" | `POST /planos/{id}/itens` | `adicionarItem(formulario)` |
 | Remover um remédio | `DELETE /planos/{id}/itens/{itemId}` | `removerItem(id)` |
@@ -96,19 +98,18 @@ O "Conferi" do P02 continua na tela. O que garante a revisão obrigatória é o 
 | Front (`js/dominio/plano.js`) | Back (`ItemDoPlanoRequest`) | Como traduzir |
 |---|---|---|
 | `nome` | `nomeMedicamento` | Igual. O front limita a 80 caracteres; o back, a 120 |
-| `concentracao`, `qtd`, `unidade` | `dosagem` | `"50 mg · 1 comprimido"`, até 60 caracteres, enquanto o back não tiver campos próprios (decisão do grupo) |
+| `concentracao`, `qtd`, `unidade` | `dosagem` | O front junta tudo em `"50 mg · 1 comprimido"`, até 60 caracteres (decisão do grupo, 22/11/2026). Na volta, o front separa o texto pelo `·` |
 | `via` | `viaAdministracao` | Rótulo da via (`"oral"`, `"sublingual"`, ...). Opcional |
 | `horarios: ["08:00", "20:00"]` | `horarios` | Igual (o `LocalTime` aceita `"HH:MM"`) |
 | (calculada) | `frequencia` | Pelo número de horários: `"1 vez ao dia"`, `"2 vezes ao dia"`, ... |
 | `duracao` | `duracaoTratamento` | `{tipo:"continuo"}` vira `"uso contínuo"`, `{tipo:"dias",dias:7}` vira `"7 dias"`, `{tipo:"ate",fim:"2026-11-30"}` vira `"até 30/11/2026"` |
-| `obs` | (não tem) | Decisão do grupo |
+| `obs` | (não tem) | Não cabe nos 60 caracteres de `dosagem`. Fica só no aparelho até o back ter um campo próprio (P4) |
 | `foto` | (não tem) | RF008, P4 |
 
 ### O que falta no back-end para o front funcionar sem o mock
 
-1. **Uma rota que devolva o plano atual do paciente.** Ao abrir, o app precisa saber se já existe plano confirmado. Hoje só existe `GET /planos/{id}`.
-2. **Duração estruturada por item.** O front gera as doses de cada remédio pelo período dele. O back guarda `duracaoTratamento` em texto livre e `dataFim` no plano inteiro. Enquanto isso não mudar, o texto precisa seguir um dos três formatos da tabela acima.
-3. **Alteração do plano confirmado** (UC-04, P07), no P4. Hoje o front a guarda como "alteração pendente" até a revisão.
+1. **Duração estruturada por item.** O front gera as doses de cada remédio pelo período dele. O back guarda `duracaoTratamento` em texto livre e `dataFim` no plano inteiro. Enquanto isso não mudar, o texto precisa seguir um dos três formatos da tabela acima.
+2. **Alteração do plano confirmado** (UC-04, P07), no P4. Hoje o front a guarda como "alteração pendente" até a revisão.
 
 ## Doses, painel e lembrete (proposta para o Bloco D)
 
@@ -131,11 +132,11 @@ O servidor não pode confiar no relógio do aparelho. Ele precisa usar o **próp
 |---|---|---|
 | O id não é de uma dose do plano | 404 | "Esta dose não está no plano." |
 | Ainda não chegou o horário T | 409 | "Ainda não chegou o horário desta dose." |
-| Passou o fim da janela (T + 120 min, ou a próxima dose do mesmo remédio, o que vier antes) | 409 | "O prazo de 2 horas terminou. A dose conta como não tomada." |
+| Passou o fim da janela: mais de 120 min depois de T (com 120 ainda aceita), ou chegou o horário da próxima dose do mesmo remédio, o que vier antes | 409 | "O prazo de 2 horas terminou. A dose conta como não tomada." |
 | A dose já tem registro (o registro é final) | 409 | "Esta dose já foi registrada." |
 | Desfazer depois do fim da janela (RF004 E3) | 409 | "O prazo para corrigir terminou. O registro ficou como está." |
 
-Os limites da janela (R07) estão nos testes de `tests/doses.test.js`: T+119 continua pendente, e T+120 e T+121 viram não tomada.
+Os limites da janela (cenário QS-02, risco R07) estão nos testes de `tests/doses.test.js`: com T+119 e T+120 o registro é aceito, e com T+121 a dose vira não tomada. A conta é por minuto: 10:00:59 ainda vale como 120 min para uma dose das 8:00.
 
 ### Web Push (UC-07)
 

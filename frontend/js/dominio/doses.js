@@ -3,6 +3,7 @@
 // Programada: antes do horário T.
 // Pendente:   de T até o fim da janela.
 // Fim da janela: o que vier primeiro entre T + 120 min e a próxima dose do mesmo medicamento.
+//   O limite de 2 h é inclusivo (cenário QS-02): com 120 min ainda dá para registrar; com 121, não.
 // Tomada / Não tomada: registradas pelo usuário dentro da janela. O registro é final.
 // Sem registro até o fim da janela: Não tomada (automática).
 // A dose pertence ao dia de T, mesmo que seja resolvida depois da meia-noite.
@@ -78,20 +79,30 @@ export function proximaDose(dose) {
   return null;
 }
 
+// Instante em que a janela fecha (a partir dele, não dá mais para registrar).
+// O relógio da tela anda em minutos, então "120 min" vale até o fim do minuto 120:
+// a janela fecha no início do minuto 121. A próxima dose do mesmo remédio fecha
+// a janela no horário dela.
 export function fimDaJanela(dose) {
-  const limite = somarMinutos(dose.t, JANELA_MINUTOS);
+  const limite = somarMinutos(dose.t, JANELA_MINUTOS + 1);
   const proxima = proximaDose(dose);
   return proxima && proxima < limite ? proxima : limite;
 }
 
+// Último minuto em que ainda dá para registrar, para mostrar na tela ("Registre até as 10:00").
+export function registrarAte(dose) {
+  return somarMinutos(fimDaJanela(dose), -1);
+}
+
 export function estadoDaDose(dose, registro, agora) {
   const fimJanela = fimDaJanela(dose);
+  const ate = registrarAte(dose);
   if (registro) {
-    return { estado: registro.status, automatica: false, registradoEm: new Date(registro.em), fimJanela };
+    return { estado: registro.status, automatica: false, registradoEm: new Date(registro.em), fimJanela, registrarAte: ate };
   }
-  if (agora < dose.t) return { estado: ESTADOS.PROGRAMADA, automatica: false, fimJanela };
-  if (agora < fimJanela) return { estado: ESTADOS.PENDENTE, automatica: false, fimJanela };
-  return { estado: ESTADOS.NAO_TOMADA, automatica: true, fimJanela };
+  if (agora < dose.t) return { estado: ESTADOS.PROGRAMADA, automatica: false, fimJanela, registrarAte: ate };
+  if (agora < fimJanela) return { estado: ESTADOS.PENDENTE, automatica: false, fimJanela, registrarAte: ate };
+  return { estado: ESTADOS.NAO_TOMADA, automatica: true, fimJanela, registrarAte: ate };
 }
 
 export function podeRegistrar(dose, agora) {

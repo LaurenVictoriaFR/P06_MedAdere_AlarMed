@@ -1,15 +1,20 @@
 // Regras do cadastro de conta (UC-05) e do login (UC-06), sem DOM.
-// Repetem as validações do back-end (CadastroRequest, LoginRequest e ContaService,
-// na branch feature/conta-login) com as mesmas mensagens. Assim o erro aparece
-// igual com o mock e com a API real.
+// Repetem as validações do back-end (CadastroRequest, LoginRequest e ContaService)
+// com as mesmas mensagens. Assim o erro aparece igual com o mock e com a API real.
 
 import { dataValida } from './tempo.js';
 
-export const LIMITES_CONTA = Object.freeze({ nome: 120, email: 120, senhaMin: 8, senhaMax: 100, telefone: 20 });
+export const LIMITES_CONTA = Object.freeze({ nome: 120, email: 120, senhaMin: 8, senhaMax: 100, senhaBytes: 72, telefone: 20 });
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // De 8 a 100 caracteres, com pelo menos uma letra e um número (mesma regra do back-end).
 const SENHA = /^(?=.*[A-Za-z])(?=.*\d).{8,100}$/;
+
+// O back-end guarda a senha com hash BCrypt, que só aceita até 72 bytes.
+// Letras acentuadas ocupam 2 bytes, então o limite real pode ficar abaixo de 72 letras.
+function bytes(texto) {
+  return new TextEncoder().encode(texto).length;
+}
 
 export function normalizarEmail(email) {
   return String(email ?? '').trim().toLowerCase();
@@ -38,10 +43,13 @@ export function validarCadastro(f, hoje) {
 
   if (!dados.email) erros.email = 'Informe o email do usuário.';
   else if (dados.email.length > LIMITES_CONTA.email) erros.email = 'O email pode ter no máximo 120 caracteres.';
-  else if (!EMAIL.test(dados.email)) erros.email = 'Informe um e-mail válido.';
+  else if (!EMAIL.test(dados.email)) erros.email = 'Informe um email válido.';
 
   if (!dados.senha.trim()) erros.senha = 'Informe a senha do usuário.';
   else if (!SENHA.test(dados.senha)) erros.senha = 'A senha deve ter de 8 a 100 caracteres, com letras e números.';
+  else if (bytes(dados.senha) > LIMITES_CONTA.senhaBytes) {
+    erros.senha = 'A senha é longa demais: o limite é de 72 bytes (letras acentuadas ocupam mais de 1).';
+  }
 
   // No back-end, a confirmação diferente volta como erro geral (409). Aqui ela
   // aparece no próprio campo, antes de enviar.
@@ -64,7 +72,7 @@ export function validarCadastro(f, hoje) {
 export function validarLogin(f) {
   const dados = { email: normalizarEmail(f.email), senha: String(f.senha ?? '') };
   const erros = {};
-  if (!dados.email) erros.email = 'Informe o e-mail.';
+  if (!dados.email) erros.email = 'Informe o email.';
   if (!dados.senha.trim()) erros.senha = 'Informe a senha.';
   return resultado(erros, dados);
 }

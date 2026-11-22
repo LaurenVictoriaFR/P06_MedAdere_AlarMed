@@ -56,7 +56,15 @@ test('UC-05: senha de 8 a 100 caracteres, com letras e números', () => {
   assert.ok(comSenha('12345678').erros.senha, 'sem letra');
   assert.ok(comSenha(`a${'1'.repeat(100)}`).erros.senha, '101 caracteres');
   assert.equal(comSenha('abcd1234').valido, true);
-  assert.equal(comSenha(`a${'1'.repeat(99)}`).valido, true);
+});
+
+// O BCrypt do back-end só aceita até 72 bytes (PR #7). Letra acentuada ocupa 2 bytes.
+test('UC-05: senha com mais de 72 bytes é recusada, mesmo com até 100 caracteres', () => {
+  const comSenha = (senha) => validarCadastro(cadastro({ senha, confirmacaoSenha: senha }), HOJE);
+  assert.equal(comSenha(`a${'1'.repeat(71)}`).valido, true, '72 bytes');
+  assert.match(comSenha(`a${'1'.repeat(72)}`).erros.senha, /72 bytes/, '73 bytes');
+  assert.equal(comSenha(`a1${'ã'.repeat(35)}`).valido, true, '37 caracteres, 72 bytes');
+  assert.match(comSenha(`a1${'ã'.repeat(36)}`).erros.senha, /72 bytes/, '38 caracteres, 74 bytes');
 });
 
 test('UC-05: confirmação diferente da senha é recusada', () => {

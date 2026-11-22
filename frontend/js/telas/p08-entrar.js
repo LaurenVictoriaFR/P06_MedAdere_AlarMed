@@ -18,7 +18,7 @@ const ORDEM_DOS_CAMPOS = ['nome', 'dataNascimento', 'email', 'telefone', 'senha'
 const TERMOS = [
   'O AlarMed é um protótipo acadêmico (COMP0503, UFS). Use apenas dados fictícios.',
   'O app ajuda a lembrar e a registrar as doses. Ele não substitui a orientação de médicos e farmacêuticos e não verifica interações entre remédios.',
-  'Nesta versão, a senha não é criptografada. Não use uma senha que você usa em outros serviços.',
+  'Por ser um protótipo, não use uma senha que você usa em outros serviços.',
   'Os registros mostram o que foi marcado no app. Eles não comprovam que o remédio foi tomado.',
 ];
 

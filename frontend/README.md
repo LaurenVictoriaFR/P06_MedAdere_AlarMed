@@ -71,4 +71,4 @@ Regras do código:
 
 - **Lembrete com o app fechado** depende de Web Push vindo do backend (ver `API.md`). Por enquanto, o aviso aparece com o AlarMed aberto ou em segundo plano. No iPhone, só com o app na Tela de Início (iOS 16.4+).
 - **Dados no navegador:** o mock não sincroniza entre aparelhos. O vínculo à conta (Q02) se cumpre com o backend.
-- **Sem hash de senha nem bloqueio** (RNF004 adiado por ADR). Use só dados fictícios.
+- **Senha:** o back-end guarda a senha com hash BCrypt (ADR-04 revisada), mas o mock do front a guarda como foi digitada, no navegador. Não há bloqueio de tentativas. Use só dados fictícios.
