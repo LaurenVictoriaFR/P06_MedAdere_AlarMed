@@ -425,6 +425,39 @@ body[data-tela="entrar"] {
   background: var(--verde);
 }
 
+/* Taxa do mês e taxa atual: lado a lado quando há espaço, uma embaixo da outra no celular. */
+.taxas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.taxas .cartao-taxa {
+  min-width: 0;
+}
+
+.seletor {
+  width: 100%;
+  min-height: var(--alvo);
+  padding: 0 12px;
+  border: 2px solid var(--borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--campo);
+  color: var(--texto-forte);
+  font-size: 1rem;
+}
+
+.seletor:focus-visible {
+  outline: none;
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(33, 117, 77, 0.28);
+}
+
+/* O relatório impresso (RF005) só aparece no papel ou no PDF. */
+.so-impressao {
+  display: none;
+}
+
 .cartao-calendario {
   padding: 14px 10px 16px;
 }
@@ -977,5 +1010,95 @@ body[data-tela="notificacao"] {
   .entrar-hero .hero-destaques .icone {
     width: 24px;
     height: 24px;
+  }
+}
+
+/* ---------- Impressão do painel (RF005: exportar para a consulta) ---------- */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  html[data-relogio="simulado"] body::after {
+    display: none;
+  }
+
+  .abas,
+  .pular,
+  .toast-area,
+  .nao-imprimir,
+  .mes-nav .btn-icone,
+  .tela-painel .aviso {
+    display: none !important;
+  }
+
+  body.com-abas main {
+    margin-left: 0;
+    padding-bottom: 0;
+  }
+
+  .tela {
+    max-width: none;
+    padding: 0;
+    gap: 12px;
+  }
+
+  .so-impressao {
+    display: block;
+  }
+
+  .cartao,
+  .mes-nav {
+    box-shadow: none;
+    border-color: #999;
+    break-inside: avoid;
+  }
+
+  .dia,
+  .amostra,
+  .taxa-barra,
+  .taxa-barra span {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .taxa-numero {
+    font-size: 2.5rem;
+  }
+
+  .relatorio-cabecalho {
+    padding-bottom: 8px;
+    border-bottom: 2px solid #15211C;
+  }
+
+  .relatorio-titulo {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .relatorio-tabela {
+    break-inside: avoid;
+  }
+
+  .relatorio-tabela h2 {
+    margin-bottom: 6px;
+    font-size: 1.0625rem;
+  }
+
+  .relatorio-tabela table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .relatorio-tabela th,
+  .relatorio-tabela td {
+    padding: 4px 8px;
+    border: 1px solid #999;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
   }
 }

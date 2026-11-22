@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calcularMes, calcularTaxa, textoTaxa, resumirDia, mesesDisponiveis, dosesComEstado } from '../js/dominio/adesao.js';
+import {
+  calcularMes, calcularTaxa, calcularTaxaAtual, chaveDoMedicamento, medicamentosDoPlano,
+  textoTaxa, resumirDia, mesesDisponiveis, dosesComEstado,
+} from '../js/dominio/adesao.js';
 import { todosOsItens, idDose } from '../js/dominio/doses.js';
 import { em, item, planoConfirmado } from './ajuda.js';
 
@@ -59,6 +62,58 @@ test('dose das 23h pendente na madrugada mantém o dia anterior em andamento', (
   const plano = planoConfirmado([item({ horarios: ['23:00'] })], em('2026-10-01', '07:00'));
   const doses = dosesComEstado(todosOsItens(plano), {}, '2026-10-17', em('2026-10-18', '00:30'));
   assert.equal(resumirDia(doses).agregado, 'em_andamento');
+});
+
+// Plano desde 28/09, Losartana às 08:00 e Metformina às 20:00. Hoje = 02/10 às 12:00.
+function historicoDeDoisRemedios() {
+  const plano = planoConfirmado([
+    item({ horarios: ['08:00'] }),
+    item({ nome: 'Metformina', concentracao: '850 mg', horarios: ['20:00'] }, 'i2'),
+  ], em('2026-09-28', '07:00'));
+  const registros = {
+    [idDose('i1', '2026-09-28', '08:00')]: reg('tomada', '2026-09-28', '08:10'),
+    [idDose('i1', '2026-09-29', '08:00')]: reg('tomada', '2026-09-29', '08:10'),
+    // 30/09 sem registro: não tomada automática
+    [idDose('i1', '2026-10-01', '08:00')]: reg('tomada', '2026-10-01', '08:10'),
+    [idDose('i1', '2026-10-02', '08:00')]: reg('tomada', '2026-10-02', '08:20'),
+    [idDose('i2', '2026-09-28', '20:00')]: reg('nao_tomada', '2026-09-28', '20:30'),
+    [idDose('i2', '2026-09-29', '20:00')]: reg('tomada', '2026-09-29', '20:05'),
+    // 30/09 e 01/10 sem registro; a de hoje às 20:00 ainda é programada
+  };
+  return { itens: todosOsItens(plano), registros, agora: em('2026-10-02', '12:00') };
+}
+
+test('UC-03: taxa atual geral conta todas as doses passadas desde o início, não só o mês', () => {
+  const { itens, registros, agora } = historicoDeDoisRemedios();
+  const atual = calcularTaxaAtual(itens, registros, agora);
+  assert.equal(atual.tomadas, 5);
+  assert.equal(atual.resolvidas, 9, '5 da Losartana + 4 da Metformina; a de hoje às 20:00 fica fora');
+  assert.equal(textoTaxa(atual.taxa), '56%');
+  const outubro = calcularMes(itens, registros, '2026-10', agora);
+  assert.equal(textoTaxa(outubro.taxa), '67%', 'a taxa do mês só olha outubro');
+});
+
+test('UC-03 A3: taxa atual por medicamento', () => {
+  const { itens, registros, agora } = historicoDeDoisRemedios();
+  const losartana = calcularTaxaAtual(itens, registros, agora, chaveDoMedicamento(itens[0]));
+  const metformina = calcularTaxaAtual(itens, registros, agora, chaveDoMedicamento(itens[1]));
+  assert.equal(textoTaxa(losartana.taxa), '80%');
+  assert.equal(textoTaxa(metformina.taxa), '25%');
+});
+
+test('UC-03 A4: sem doses passadas, a taxa atual fica "—"', () => {
+  const plano = planoConfirmado([item({ horarios: ['20:00'] })], em('2026-10-17', '10:00'));
+  assert.equal(calcularTaxaAtual(todosOsItens(plano), {}, em('2026-10-17', '10:05')).taxa, null);
+  assert.equal(calcularTaxaAtual([], {}, em('2026-10-17', '10:05')).taxa, null);
+});
+
+test('o mesmo remédio em dois itens aparece uma vez só na lista de medicamentos', () => {
+  const itens = [
+    item({ horarios: ['08:00'] }),
+    item({ nome: 'losartana', horarios: ['20:00'] }, 'i2'),
+    item({ nome: 'AAS', concentracao: '100 mg' }, 'i3'),
+  ];
+  assert.deepEqual(medicamentosDoPlano(itens).map((m) => m.chave), ['aas 100 mg', 'losartana 50 mg']);
 });
 
 test('meses disponíveis vão da primeira vigência até o mês atual', () => {
