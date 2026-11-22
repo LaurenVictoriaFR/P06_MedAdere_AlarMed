@@ -1,5 +1,8 @@
 package br.ufs.alarmed.conta.service;
 
+import java.nio.charset.StandardCharsets;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +20,16 @@ import br.ufs.alarmed.conta.repository.PacienteRepository;
 @Service
 public class ContaService {
 	private static final String CREDENCIAIS_INVALIDAS = "Email ou senha inválidos.";
+	private static final int LIMITE_BYTES_SENHA = 72;
 	private final ContaUsuarioRepository contaRepository;
 	private final PacienteRepository pacienteRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	public ContaService(ContaUsuarioRepository contaRepository, PacienteRepository pacienteRepository) {
+	public ContaService(ContaUsuarioRepository contaRepository, PacienteRepository pacienteRepository,
+			PasswordEncoder passwordEncoder) {
 		this.contaRepository = contaRepository;
 		this.pacienteRepository = pacienteRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Transactional
@@ -31,13 +38,17 @@ public class ContaService {
 			throw new RegraNegocioException("A confirmação da senha não confere");
 		}
 
+		if (longaDemais(request.senha())) {
+			throw new RegraNegocioException("A senha é longa demais: o limite é de 72 bytes (letras acentuadas ocupam mais de 1).");
+		}
+
 		String email = normalizar(request.email());
 		if (contaRepository.existsByEmail(email)) {
 			throw new RegraNegocioException("Email já cadastrado.");
 		}
 
 		ContaUsuario conta = contaRepository.save(
-				new ContaUsuario(request.nome(), email, request.senha(), request.dataNascimento(), request.telefone()));
+				new ContaUsuario(request.nome(), email, passwordEncoder.encode(request.senha()), request.dataNascimento(), request.telefone()));
 
 		return pacienteRepository.save(new Paciente(conta, request.nome()));
 	}
@@ -47,12 +58,17 @@ public class ContaService {
 	    ContaUsuario conta = contaRepository.findByEmail(email)
 	            .orElseThrow(() -> new NaoAutenticadoException(CREDENCIAIS_INVALIDAS));
 
-	    if (!request.senha().equals(conta.getSenha())) {
+	    if (longaDemais(request.senha()) || !passwordEncoder.matches(request.senha(), conta.getSenha())) {
 	        throw new NaoAutenticadoException(CREDENCIAIS_INVALIDAS);
 	    }
 	    Paciente paciente = pacienteRepository.findByConta(conta)
 	            .orElseThrow(() -> new IllegalStateException("Conta sem paciente associado."));
 	    return paciente;
+	}
+
+	// o BCrypt só aceita senhas de até 72 bytes
+	private boolean longaDemais(String senha) {
+		return senha.getBytes(StandardCharsets.UTF_8).length > LIMITE_BYTES_SENHA;
 	}
 
 	private String normalizar(String email) {
