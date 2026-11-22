@@ -17,3 +17,18 @@ jobs:
           cache: maven
       - name: Build e testes
         run: ./mvnw -B verify
+
+  # Testes do front-end (regras de domínio e contraste do RNF001).
+  # Roda em paralelo com o back-end; não instala dependências.
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Testes do front-end
+        run: node --test

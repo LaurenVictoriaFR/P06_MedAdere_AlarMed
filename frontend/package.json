@@ -1,0 +1,14 @@
+{
+  "name": "alarmed-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend do AlarMed (P06 MedAdere, COMP0503 UFS). HTML, CSS e JS sem build.",
+  "type": "module",
+  "scripts": {
+    "start": "node servidor.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,74 @@
+/* Tokens do AlarMed. Cores amostradas das imagens de referência.
+   Os pares de texto são conferidos em tests/contraste.test.js (RNF001, WCAG AA). */
+:root {
+  color-scheme: light;
+
+  /* Marca */
+  --verde: #21754D;          /* botão primário, seleção. Branco sobre ele: 5,6:1 */
+  --verde-hover: #1A603F;
+  --verde-escuro: #0C4534;   /* wordmark, títulos de destaque */
+  --verde-medio: #237E58;    /* ícones, "Med" do logo */
+  --verde-link: #1D5338;     /* links e botões de texto */
+  --verde-claro: #DDEFE6;    /* aba ativa, avisos de sucesso */
+  --amarelo: #FBBA52;        /* sino do logo. Só decorativo, nunca texto */
+
+  /* Superfícies */
+  --fundo: #F5EFE5;
+  --fundo-claro: #FCF7F1;
+  --superficie: #FDF9F4;
+  --campo: #FFFFFF;
+  --neutro: #E7E8E0;
+  --neutro-2: #DFE3D7;
+  --borda: #E3DACB;          /* decorativa: separa cartões do fundo */
+  --borda-campo: #77847D;    /* campos e chips: 3:1 contra o fundo (WCAG 1.4.11) */
+
+  /* Texto */
+  --texto: #354A46;
+  --texto-forte: #15211C;
+  --texto-suave: #4E5A54;
+  --erro: #9B2C2C;
+  --foco: #1F4E79;
+  --escuro: #15211C;         /* fundo do toast */
+
+  /* Estados da dose */
+  --tomada-fundo: #DDEFE6;
+  --tomada-texto: #1F5641;
+  --nao-fundo: #F6E0E0;
+  --nao-texto: #8E2B2B;
+  --pendente-fundo: #FCEBD3;
+  --pendente-texto: #7A4300;
+  --programada-fundo: #E8ECEA;
+  --programada-texto: #3E4A44;
+  --info-fundo: #E2ECF6;
+  --info-texto: #1F4E79;
+
+  /* Calendário (agregados do dia) */
+  --dia-todas: #21754D;
+  --dia-todas-texto: #FFFFFF;
+  --dia-parte: #F1C98A;
+  --dia-parte-texto: #3D2A00;
+  --dia-parte-borda: #B9842F;
+  --dia-nenhuma: #F3D0D0;
+  --dia-nenhuma-texto: #6E1F1F;
+  --dia-nenhuma-borda: #B54848;
+
+  /* Tipografia */
+  --fonte: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --t-corpo: 1.0625rem;   /* 17 px */
+  --t-pequeno: 0.9375rem; /* 15 px */
+  --t-legenda: 0.875rem;  /* 14 px */
+  --t-grande: 1.125rem;   /* 18 px */
+  --t-h1: 1.75rem;        /* 28 px */
+  --t-h2: 1.1875rem;      /* 19 px */
+
+  /* Medidas */
+  --alvo: 48px;
+  --raio-card: 24px;
+  --raio-item: 18px;
+  --raio-campo: 14px;
+  --raio-chip: 12px;
+  --raio-pilula: 999px;
+  --sombra: 0 1px 2px rgba(21, 33, 28, 0.05), 0 10px 28px rgba(12, 69, 52, 0.08);
+  --sombra-leve: 0 1px 2px rgba(21, 33, 28, 0.05), 0 4px 12px rgba(12, 69, 52, 0.05);
+  --largura-trilho: 248px;
+}
