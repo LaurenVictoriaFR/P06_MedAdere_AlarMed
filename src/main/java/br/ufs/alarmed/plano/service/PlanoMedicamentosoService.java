@@ -49,6 +49,19 @@ public class PlanoMedicamentosoService {
         return PlanoResponse.de(buscarPlanoDoPaciente(planoId));
     }
 
+    // devolve o plano confirmado do paciente logado.
+    // o app chama ao abrir: se nao tiver plano confirmado (404), manda o paciente pro cadastro (P01).
+    @Transactional(readOnly = true)
+    public PlanoResponse buscarPlanoAtual() {
+        UUID pacienteId = contextoPaciente.pacienteAtual();
+
+        List<PlanoMedicamentoso> confirmados = planoRepository.findByPacienteIdAndSituacao(pacienteId, SituacaoPlano.CONFIRMADO);
+        if (confirmados.isEmpty()) {
+            throw new RecursoNaoEncontradoException("Nenhum plano confirmado.");
+        }
+        return PlanoResponse.de(confirmados.get(0));
+    }
+
     // UC-01 passos 2 a 4: adiciona um medicamento ao plano
     public PlanoResponse adicionarItem(UUID planoId, ItemDoPlanoRequest request) {
         PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);

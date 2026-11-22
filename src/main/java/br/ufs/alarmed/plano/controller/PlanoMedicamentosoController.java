@@ -32,6 +32,13 @@ public class PlanoMedicamentosoController {
         return planoService.iniciarCadastro();
     }
 
+    // plano confirmado do paciente logado; 404 se ele ainda nao tiver um.
+    // o Spring da prioridade a rota fixa "/atual" sobre "/{planoId}", entao as duas convivem.
+    @GetMapping("/atual")
+    public PlanoResponse buscarPlanoAtual() {
+        return planoService.buscarPlanoAtual();
+    }
+
     // consulta o plano, usado pela tela de edicao e pela de revisao (P02)
     @GetMapping("/{planoId}")
     public PlanoResponse buscarPlano(@PathVariable UUID planoId) {

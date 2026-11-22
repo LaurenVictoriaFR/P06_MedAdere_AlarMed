@@ -165,6 +165,50 @@ class PlanoMedicamentosoControllerIntegrationTest {
                 .andExpect(status().isConflict());
     }
 
+    @Test
+    void planoAtualSemPlanoConfirmadoRetorna404() throws Exception {
+        UUID pacienteId = UUID.randomUUID();
+        // so existe um rascunho, que ainda nao conta como plano atual
+        criarPlano(pacienteId);
+
+        mockMvc.perform(get("/planos/atual").sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void planoAtualDevolveOPlanoConfirmado() throws Exception {
+        UUID pacienteId = UUID.randomUUID();
+        UUID planoId = criarPlano(pacienteId);
+        adicionarItemLosartana(pacienteId, planoId);
+        mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
+        mockMvc.perform(post("/planos/{id}/confirmar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, pacienteId));
+
+        mockMvc.perform(get("/planos/atual").sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(planoId.toString()))
+                .andExpect(jsonPath("$.situacao").value("CONFIRMADO"))
+                .andExpect(jsonPath("$.itens[0].nomeMedicamento").value("Losartana"));
+    }
+
+    @Test
+    void planoAtualNaoMostraPlanoDeOutroPaciente() throws Exception {
+        UUID donoDoPlano = UUID.randomUUID();
+        UUID planoId = criarPlano(donoDoPlano);
+        adicionarItemLosartana(donoDoPlano, planoId);
+        mockMvc.perform(post("/planos/{id}/revisar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, donoDoPlano));
+        mockMvc.perform(post("/planos/{id}/confirmar", planoId).sessionAttr(ContaController.CHAVE_SESSAO, donoDoPlano));
+
+        // outro paciente logado nao enxerga o plano confirmado do primeiro
+        mockMvc.perform(get("/planos/atual").sessionAttr(ContaController.CHAVE_SESSAO, UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void planoAtualSemSessaoRetorna401() throws Exception {
+        mockMvc.perform(get("/planos/atual"))
+                .andExpect(status().isUnauthorized());
+    }
+
     private UUID criarPlano(UUID pacienteId) throws Exception {
         String resposta = mockMvc.perform(post("/planos").sessionAttr(ContaController.CHAVE_SESSAO, pacienteId))
                 .andReturn().getResponse().getContentAsString();
