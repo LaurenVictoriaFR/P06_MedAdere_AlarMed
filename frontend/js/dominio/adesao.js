@@ -1,9 +1,10 @@
-// Taxa de adesão e agregados do calendário (RF005).
+// Taxa de adesão e agregados do calendário (RF005, UC-03).
 // Taxa = tomadas ÷ (tomadas + não tomadas). Pendentes e programadas ficam fora.
 // Sem doses resolvidas, a taxa é null e aparece como "—".
+// Há duas taxas: a do mês do calendário e a atual, desde o início do plano.
 
 import { dosesDoDia, estadoDaDose, ESTADOS } from './doses.js';
-import { dataISO, diasNoMes, doisDigitos, mesISO, somarMeses } from './tempo.js';
+import { dataISO, diasNoMes, doisDigitos, mesISO, somarDias, somarMeses } from './tempo.js';
 
 export function dosesComEstado(itens, registros, data, agora) {
   return dosesDoDia(itens, data).map((dose) => {
@@ -72,6 +73,38 @@ export function calcularMes(itens, registros, mes, agora) {
     contagem,
     primeiroDiaDaSemana: new Date(ano, m - 1, 1).getDay(), // 0 = domingo
   };
+}
+
+// O mesmo remédio vira outro item quando o plano é alterado. Por isso, para a
+// taxa por medicamento, a chave é o nome com a concentração, e não o id do item.
+export function chaveDoMedicamento(item) {
+  return `${item.nome} ${item.concentracao}`.trim().toLocaleLowerCase('pt-BR');
+}
+
+// Medicamentos do plano e do histórico, sem repetir, em ordem alfabética.
+export function medicamentosDoPlano(itens) {
+  const porChave = new Map();
+  for (const item of itens) {
+    const chave = chaveDoMedicamento(item);
+    if (!porChave.has(chave)) porChave.set(chave, item);
+  }
+  return [...porChave].map(([chave, item]) => ({ chave, item }))
+    .sort((a, b) => a.item.nome.localeCompare(b.item.nome, 'pt-BR'));
+}
+
+// Taxa de adesão atual (UC-03 A3 e A4): doses tomadas ÷ doses passadas, do início
+// do plano até agora. Dose passada é a tomada ou a não tomada. Com `chave`, conta
+// só um medicamento; sem ela, é a taxa geral. Trocar o mês do calendário não muda
+// esta taxa (UC-03 A1).
+export function calcularTaxaAtual(itens, registros, agora, chave = null) {
+  const escolhidos = chave === null ? itens : itens.filter((i) => chaveDoMedicamento(i) === chave);
+  const inicios = escolhidos.map((i) => i.inicio).filter(Boolean).sort();
+  const doses = [];
+  const hoje = dataISO(agora);
+  for (let data = inicios[0]; data && data <= hoje; data = somarDias(data, 1)) {
+    doses.push(...dosesComEstado(escolhidos, registros, data, agora));
+  }
+  return calcularTaxa(doses);
 }
 
 // Meses com plano: do mês da primeira vigência até o mês atual (RF005 CA02).

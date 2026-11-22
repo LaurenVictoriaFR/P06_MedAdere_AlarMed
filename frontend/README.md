@@ -30,7 +30,7 @@ node --test
 ```
 
 Cobrem as regras de domínio (cadastro e login do UC-05 e UC-06, validação do item,
-RN01, janela de 2 h, dia da dose, taxa mensal) e os pares de cor do RNF001, lidos
+RN01, janela de 2 h, dia da dose, taxa do mês e taxa atual) e os pares de cor do RNF001, lidos
 de `css/tokens.css`. No CI, rodam no job `frontend`.
 
 ## Telas e rotas
@@ -41,7 +41,7 @@ de `css/tokens.css`. No CI, rodam no job `frontend`.
 | P01 Cadastro / Adicionar medicamento | `#/cadastro` | RF002, RF008, RN01, UC-01 |
 | P02 Revisão e confirmação | `#/revisao` | RF002, RF010, RN01, RN05, UC-08 |
 | P03 Doses de hoje | `#/hoje` | RF004, RN02, UC-02 |
-| P04 Painel do mês | `#/painel?mes=AAAA-MM` | RF005, UC-03 |
+| P04 Painel do mês (com "Imprimir ou salvar em PDF") | `#/painel?mes=AAAA-MM` | RF005, UC-03 |
 | P07 Meu plano | `#/plano` | RF010, RN01, UC-04 |
 | P09 Lembrete (simulação) | `#/notificacao` | RF003, UC-07 |
 

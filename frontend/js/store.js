@@ -13,7 +13,7 @@ function inicial() {
     },
     cadastro: { form: formularioVazio(), erros: {}, horaExtra: '', erroHoraExtra: '', erroFoto: '' },
     revisao: { conferido: false },
-    painel: { diaSelecionado: null },
+    painel: { diaSelecionado: null, medicamento: null },
   };
 }
 
