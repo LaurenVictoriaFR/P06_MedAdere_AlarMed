@@ -12,7 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 //UC-05: quem acessa o sistema (paciente ou cuidador).
-//A senha fica sem hash por decisao do grupo (ADR-04, risco R04).
+//A senha é guardada como hash BCrypt, nunca em texto simples (ADR-04 revisada, RNF004).
 @Entity
 @Table(name = "conta_usuario")
 

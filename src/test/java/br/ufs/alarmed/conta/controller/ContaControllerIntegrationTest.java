@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import br.ufs.alarmed.conta.repository.ContaUsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +29,36 @@ class ContaControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ContaUsuarioRepository contaRepository;
+
+    @Test
+    void senhaEhGuardadaComoHashEOLoginContinuaFuncionando() throws Exception {
+        cadastrar("lauren@exemplo.test", SENHA, SENHA, true).andExpect(status().isCreated());
+
+        String guardada = contaRepository.findByEmail("lauren@exemplo.test").orElseThrow().getSenha();
+
+        assertThat(guardada).isNotEqualTo(SENHA).startsWith("$2");
+        login("lauren@exemplo.test", SENHA).andExpect(status().isOk());
+    }
+
+    @Test
+    void cadastroComSenhaAcimaDe72BytesRetorna409EntaoNaoQuebra() throws Exception {
+        String longa = "a1" + "x".repeat(71);
+
+        cadastrar("lauren@exemplo.test", longa, longa, true)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.mensagem").exists());
+    }
+
+    @Test
+    void loginComSenhaAcimaDe72BytesRetorna401() throws Exception {
+        cadastrar("lauren@exemplo.test", SENHA, SENHA, true).andExpect(status().isCreated());
+
+        login("lauren@exemplo.test", "a1" + "x".repeat(98))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.mensagem").value(CREDENCIAIS_INVALIDAS));
+    }
 
     @Test
     void cadastroValidoRetorna201SemDevolverASenha() throws Exception {
