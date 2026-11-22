@@ -1,6 +1,7 @@
 // Datas, horas e plurais em português do Brasil.
 
-const fmtDiaLongo = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+import { dataISO } from '../dominio/tempo.js';
+const fmtDiaLongo = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 const fmtMes = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
 const fmtDiaMes = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long' });
 
@@ -10,7 +11,7 @@ function maiuscula(texto) {
 
 // "Sábado, 17 de outubro"
 export function diaPorExtenso(instante) {
-  return maiuscula(fmtDiaLongo.format(instante));
+  return maiuscula(fmtDiaLongo.format(new Date(`${dataISO(instante)}T12:00:00Z`)));
 }
 
 // "Outubro de 2026" (mes: 'AAAA-MM')

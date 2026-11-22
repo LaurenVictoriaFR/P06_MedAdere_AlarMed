@@ -166,6 +166,7 @@ export default {
   titulo: (ctx) => (P.temPlanoConfirmado(ctx.plano) ? 'Adicionar medicamento' : 'Cadastro do plano'),
 
   async render(ctx) {
+    if (ctx.api.modoReal) await ctx.api.editarPlano();
     const estado = estadoUi.cadastro;
     const { form } = estado;
     const alteracao = P.temPlanoConfirmado(ctx.plano);
@@ -223,8 +224,8 @@ export default {
     }),
     blocoHorarios(estado, ctx),
     blocoDuracao(estado, ctx, hoje),
-    blocoFoto(estado, ctx),
-    campo({
+    !ctx.api.modoReal && blocoFoto(estado, ctx),
+    !ctx.api.modoReal && campo({
       id: 'f-obs', rotulo: 'Observação da receita (opcional)', valor: form.obs, placeholder: 'Ex.: em jejum',
       autocomplete: 'off', erro: estado.erros.obs, atributos: { maxlength: P.LIMITES.obs },
       aoDigitar: (e) => { form.obs = e.target.value; limparErroDoCampo(e.target); },

@@ -66,9 +66,13 @@ function cartaoLembretes(ctx) {
   const situacao = notificacoes.situacao();
   const simulacao = h('a', { class: 'link-simulacao', href: '#/notificacao' }, 'Ver como o lembrete aparece');
   if (situacao === 'concedida') {
+    const falha = notificacoes.houveFalhaRecente();
     return aviso({
-      tipo: 'sucesso', icone: 'sino', titulo: 'Lembretes ativos neste aparelho',
-      texto: 'Deixe o AlarMed aberto ou em segundo plano para receber os avisos.',
+      tipo: falha ? 'alerta' : 'sucesso', icone: 'sino',
+      titulo: falha ? 'Confira suas doses' : 'Lembretes ativos neste aparelho',
+      texto: falha ? 'Um ou mais lembretes recentes não tiveram o envio confirmado pelo serviço. Confira os horários e registros abaixo.'
+        : ctx.api.modoReal ? 'Este aparelho está inscrito para receber avisos mesmo com o AlarMed fechado.'
+        : 'Deixe o AlarMed aberto ou em segundo plano para receber os avisos.',
       filhos: simulacao,
     });
   }
@@ -80,7 +84,7 @@ function cartaoLembretes(ctx) {
         botao({
           texto: 'Ativar lembretes', icone: 'sino', largo: false, foco: 'ativar-lembretes',
           aoClicar: async () => {
-            const resposta = await notificacoes.pedirPermissao();
+            const resposta = await notificacoes.ativar(ctx.api);
             if (resposta === 'granted') {
               mostrarToast('Lembretes ativados neste aparelho.');
               notificacoes.verificarLembretes(ctx.api);
@@ -98,6 +102,15 @@ function cartaoLembretes(ctx) {
       texto: 'Este navegador bloqueou as notificações do AlarMed. Para receber avisos, libere as notificações nas configurações do navegador.',
       filhos: simulacao,
     });
+  }
+  if (situacao === 'servidor-desativado' || situacao === 'falha') {
+    return aviso({ tipo: 'alerta', icone: 'alerta', titulo: 'Lembretes ainda não estão ativos',
+      texto: situacao === 'servidor-desativado'
+        ? 'O envio de lembretes ainda não foi configurado. Você pode continuar registrando suas doses.'
+        : 'Não foi possível inscrever este aparelho. Confira sua conexão e tente ativar os lembretes novamente.',
+      filhos: botao({ texto: 'Tentar ativar lembretes', aoClicar: async () => {
+        await notificacoes.ativar(ctx.api); ctx.atualizar();
+      } }) });
   }
   if (situacao === 'ios-instalar') {
     return aviso({
@@ -139,11 +152,13 @@ export default {
 
   async render(ctx) {
     const { agora, plano } = ctx;
-    const registros = await ctx.api.listarRegistros();
+    const registros = ctx.api.modoReal ? null : await ctx.api.listarRegistros();
     const itens = D.todosOsItens(plano);
     const hoje = dataISO(agora);
-    const doses = dosesComEstado(itens, registros, hoje, agora);
-    const deOntem = dosesComEstado(itens, registros, somarDias(hoje, -1), agora)
+    const reais = ctx.api.modoReal ? await ctx.api.listarDoses(somarDias(hoje, -1), hoje) : null;
+    const doses = reais ? reais.filter(d => d.data === hoje) : dosesComEstado(itens, registros, hoje, agora);
+    const deOntem = (reais ? reais.filter(d => d.data === somarDias(hoje, -1))
+      : dosesComEstado(itens, registros, somarDias(hoje, -1), agora))
       .filter((d) => d.estado === D.ESTADOS.PENDENTE || D.podeCorrigir(d, d.registro, agora));
     const destaque = ctx.rota.consulta.get('dose');
 

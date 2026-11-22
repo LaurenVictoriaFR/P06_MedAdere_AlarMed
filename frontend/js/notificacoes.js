@@ -1,8 +1,6 @@
 // Lembretes no horário da dose (RF003, UC-07).
 //
-// Limitação desta versão (só frontend): o aviso é disparado pelo próprio app,
-// então só aparece com o AlarMed aberto ou em segundo plano. Aviso com o app
-// fechado depende de Web Push vindo do backend (Fase 6 do plano).
+// No modo real, o servidor envia Web Push. A verificação local é exclusiva do mock.
 // No iPhone, notificações só existem com o app instalado na Tela de Início (iOS 16.4+).
 
 import * as D from './dominio/doses.js';
@@ -12,6 +10,62 @@ import { tituloItem, linhaDose } from './dominio/plano.js';
 import { relogio } from './relogio.js';
 
 const CHAVE_AVISADAS = 'alarmed:avisadas';
+let estadoPush = null;
+let usuarioPush = null;
+let sincronizando = null;
+let problemasRecentes = 0;
+export function houveFalhaRecente() { return problemasRecentes > 0; }
+
+export async function preparar(api, usuario) {
+  if (!api.modoReal) return;
+  if (!usuario) { usuarioPush = null; estadoPush = null; problemasRecentes = 0; return; }
+  if (usuarioPush === usuario.id && estadoPush !== null) return;
+  usuarioPush = usuario.id;
+  await sincronizarPush(api);
+}
+
+function chaveBytes(texto) {
+  const b64 = texto.replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(b64 + '='.repeat((4 - b64.length % 4) % 4)), c => c.charCodeAt(0));
+}
+
+async function sincronizarPush(api, criar = false) {
+  if (sincronizando) return sincronizando;
+  sincronizando = (async () => {
+    try {
+      const config = await api.chavePush();
+      if (!config.configurado) { estadoPush = 'servidor-desativado'; return; }
+      if (situacaoDoNavegador() !== 'concedida') { estadoPush = 'pendente'; return; }
+      const registro = await navigator.serviceWorker.ready;
+      let inscricao = await registro.pushManager.getSubscription();
+      const chave = chaveBytes(config.chavePublica);
+      if (inscricao?.options.applicationServerKey
+          && String(new Uint8Array(inscricao.options.applicationServerKey)) !== String(chave)) {
+        await inscricao.unsubscribe(); inscricao = null;
+      }
+      if (!inscricao && criar) inscricao = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chave });
+      if (!inscricao) { estadoPush = 'pendente'; return; }
+      try { await api.inscreverPush(inscricao.toJSON()); }
+      catch (e) {
+        if (!criar || e.status !== 409) throw e;
+        await inscricao.unsubscribe();
+        inscricao = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chave });
+        await api.inscreverPush(inscricao.toJSON());
+      }
+      const situacaoServidor = await api.situacaoPush();
+      problemasRecentes = situacaoServidor.falhasRecentes ?? 0;
+      estadoPush = 'concedida';
+    } catch { estadoPush = 'falha'; }
+  })().finally(() => { sincronizando = null; });
+  return sincronizando;
+}
+
+export async function ativar(api) {
+  if (!api.modoReal) return pedirPermissao();
+  const resposta = await pedirPermissao();
+  if (resposta === 'granted') await sincronizarPush(api, true);
+  return estadoPush === 'concedida' ? 'granted' : 'denied';
+}
 
 export function ehIos() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent)
@@ -23,12 +77,17 @@ export function estaInstalado() {
 }
 
 // 'concedida' | 'negada' | 'pendente' | 'ios-instalar' | 'indisponivel'
-export function situacao() {
+function situacaoDoNavegador() {
   if (ehIos() && !estaInstalado()) return 'ios-instalar';
   if (!('Notification' in window) || !('serviceWorker' in navigator)) return 'indisponivel';
   if (Notification.permission === 'granted') return 'concedida';
   if (Notification.permission === 'denied') return 'negada';
   return 'pendente';
+}
+
+export function situacao() {
+  const navegador = situacaoDoNavegador();
+  return navegador === 'concedida' ? (estadoPush ?? navegador) : navegador;
 }
 
 // Precisa ser chamada a partir de um toque do usuário (exigência do Safari).
@@ -90,6 +149,10 @@ export async function mostrarLembrete(dose) {
 // Chamada a cada 30 s e quando o app volta a ficar visível.
 // Avisa uma vez cada dose pendente (de hoje ou da noite anterior) ainda sem registro.
 export async function verificarLembretes(api) {
+  if (api.modoReal) {
+    if (usuarioPush) await sincronizarPush(api);
+    return; // O agendamento real pertence ao servidor; não disparar avisos locais duplicados.
+  }
   if (situacao() !== 'concedida') return;
   try {
     const usuario = await api.sessao();

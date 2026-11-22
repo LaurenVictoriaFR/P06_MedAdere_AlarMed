@@ -3,16 +3,25 @@
 // Strings nesse formato podem ser comparadas com < e > diretamente.
 
 export const MINUTO_MS = 60 * 1000;
+let fusoServidor = null;
+export function configurarFuso(fuso) { fusoServidor = fuso; }
+function partes(instante) {
+  return Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: fusoServidor,
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+    second: '2-digit', hourCycle: 'h23' }).formatToParts(instante).map(p => [p.type, p.value]));
+}
 
 export function doisDigitos(n) {
   return String(n).padStart(2, '0');
 }
 
 export function dataISO(instante) {
+  if (fusoServidor) { const p = partes(instante); return `${p.year}-${p.month}-${p.day}`; }
   return `${instante.getFullYear()}-${doisDigitos(instante.getMonth() + 1)}-${doisDigitos(instante.getDate())}`;
 }
 
 export function horaHM(instante) {
+  if (fusoServidor) { const p = partes(instante); return `${p.hour}:${p.minute}`; }
   return `${doisDigitos(instante.getHours())}:${doisDigitos(instante.getMinutes())}`;
 }
 
@@ -24,13 +33,21 @@ export function mesISO(instante) {
 export function deDataHora(data, hora = '00:00') {
   const [ano, mes, dia] = data.split('-').map(Number);
   const [hh, mm] = hora.split(':').map(Number);
-  return new Date(ano, mes - 1, dia, hh, mm, 0, 0);
+  if (!fusoServidor) return new Date(ano, mes - 1, dia, hh, mm, 0, 0);
+  const desejado = Date.UTC(ano, mes - 1, dia, hh, mm);
+  let instante = desejado;
+  for (let i = 0; i < 3; i++) {
+    const p = partes(new Date(instante));
+    const visto = Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute), Number(p.second));
+    instante += desejado - visto;
+  }
+  return new Date(instante);
 }
 
 export function somarDias(data, n) {
-  const d = deDataHora(data);
-  d.setDate(d.getDate() + n);
-  return dataISO(d);
+  const d = new Date(`${data}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
 }
 
 export function somarMinutos(instante, n) {

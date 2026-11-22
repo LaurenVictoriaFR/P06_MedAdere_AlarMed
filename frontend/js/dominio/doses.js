@@ -84,6 +84,7 @@ export function proximaDose(dose) {
 // a janela fecha no início do minuto 121. A próxima dose do mesmo remédio fecha
 // a janela no horário dela.
 export function fimDaJanela(dose) {
+  if (dose.fimJanela instanceof Date) return dose.fimJanela;
   const limite = somarMinutos(dose.t, JANELA_MINUTOS + 1);
   const proxima = proximaDose(dose);
   return proxima && proxima < limite ? proxima : limite;
@@ -98,7 +99,7 @@ export function estadoDaDose(dose, registro, agora) {
   const fimJanela = fimDaJanela(dose);
   const ate = registrarAte(dose);
   if (registro) {
-    return { estado: registro.status, automatica: false, registradoEm: new Date(registro.em), fimJanela, registrarAte: ate };
+    return { estado: registro.status, automatica: Boolean(registro.automatica), registradoEm: new Date(registro.em), fimJanela, registrarAte: ate };
   }
   if (agora < dose.t) return { estado: ESTADOS.PROGRAMADA, automatica: false, fimJanela, registrarAte: ate };
   if (agora < fimJanela) return { estado: ESTADOS.PENDENTE, automatica: false, fimJanela, registrarAte: ate };
@@ -111,7 +112,7 @@ export function podeRegistrar(dose, agora) {
 
 // Corrigir e Desfazer só dentro da janela (RF004 E3).
 export function podeCorrigir(dose, registro, agora) {
-  return Boolean(registro) && agora < fimDaJanela(dose);
+  return Boolean(registro) && !registro.automatica && agora >= dose.t && agora < fimDaJanela(dose);
 }
 
 // Localiza a dose a partir do id e confere se ela existe no plano.

@@ -1,0 +1,1 @@
+OK: conta, plano e identidade da dose preservados após parar e reiniciar o servidor; novo login exigido.

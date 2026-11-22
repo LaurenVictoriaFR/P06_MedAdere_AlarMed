@@ -1,0 +1,2 @@
+OK: cadastro, sessão, revisão obrigatória, confirmação, doses, recusas, logout e persistência após novo login.
+Plano sintético criado. Próxima dose: 16:54 no fuso America/Maceio.

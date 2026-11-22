@@ -1,0 +1,457 @@
+{
+  "data": "2026-11-22",
+  "banco": "PostgreSQL 16.9",
+  "java": "21.0.13",
+  "testes": [
+    {
+      "classe": "br.ufs.alarmed.AlarMedApplicationTests",
+      "teste": "contextLoads",
+      "segundos": 10.961,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroComSenhaAcimaDe72BytesRetorna409EntaoNaoQuebra",
+      "segundos": 0.106,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "loginComEmailEmOutraCaixaFunciona",
+      "segundos": 0.355,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroAbreASessaoComOIdDoPaciente",
+      "segundos": 0.15,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroSemAceitarOsTermosRetorna400",
+      "segundos": 0.012,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroComEmailRepetidoRetorna409",
+      "segundos": 0.168,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroComConfirmacaoDiferenteDaSenhaRetorna409",
+      "segundos": 0.01,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "senhaEhGuardadaComoHashEOLoginContinuaFuncionando",
+      "segundos": 0.262,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroComSenhaFracaRetorna400",
+      "segundos": 0.01,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "loginSemPreencherOsCamposRetorna400",
+      "segundos": 0.011,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "loginCorretoRetorna200EAbreASessao",
+      "segundos": 0.275,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "loginComEmailInexistenteRetorna401",
+      "segundos": 0.011,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "loginComSenhaAcimaDe72BytesRetorna401",
+      "segundos": 0.121,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "loginComSenhaErradaRetorna401ComAMesmaMensagem",
+      "segundos": 0.278,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "sessaoDoCadastroIdentificaOPacienteNasDemaisRotas",
+      "segundos": 0.165,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroComEmailRepetidoSoNaCaixaRetorna409",
+      "segundos": 0.146,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "teste": "cadastroValidoRetorna201SemDevolverASenha",
+      "segundos": 0.157,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DoseTest",
+      "teste": "desfazerSoDentroDaJanela",
+      "segundos": 0.008,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DoseTest",
+      "teste": "minuto120InteiroAindaAceita",
+      "segundos": 0.002,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DoseTest",
+      "teste": "qs02Limites119120E121",
+      "segundos": 0.002,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DoseTest",
+      "teste": "antesDeTEstaProgramadaERecusaRegistro",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DoseTest",
+      "teste": "tratamentoFinitoETextoInvalido",
+      "segundos": 0.003,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DoseTest",
+      "teste": "resultadoNaoPodeSerSobrescritoPelaExpiracao",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "cadastroInscricaoIdempotenteELogoutInvalidaSessao",
+      "segundos": 1.736,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "falhaTransitoriaRepeteSemReenviarAoAparelhoJaAceito",
+      "segundos": 0.238,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "geracaoIdempotenteEMeiaNoite",
+      "segundos": 0.129,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs12GeracaoConcorrenteNaoDuplica",
+      "segundos": 0.149,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "pushRecusaEndpointArbitrarioEExigeSessao",
+      "segundos": 0.067,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs06IsolamentoSemSessaoEStatusInvalido",
+      "segundos": 0.173,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs03ConcorrenciaNaoSobrescreveRegistro",
+      "segundos": 0.094,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs02ApiValida119120121ERelogioServidor",
+      "segundos": 0.233,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs12VarredurasConcorrentesSolicitamPushUmaVez",
+      "segundos": 0.164,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "falhasRecentesFicamVisiveisSomenteParaODonoDaDose",
+      "segundos": 0.112,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs10RecuperacaoNaoEnviaLembreteExpirado",
+      "segundos": 0.081,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "inscricaoExpiradaETratadaSemEnvioInfinito",
+      "segundos": 0.087,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs01Qs12UmaSolicitacaoPorAparelhoMesmoComDuasVarreduras",
+      "segundos": 0.094,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "proximaDoseFechaJanelaETratamentoAcabaNoUltimoDia",
+      "segundos": 0.037,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "qs03DisputaEntreRegistroEExpiracaoEmDezExecucoes",
+      "segundos": 0.148,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "horariosAnterioresAConfirmacaoNaoGeramDoses",
+      "segundos": 0.035,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "teste": "consultaPodeExpirarDoseSemDeixarLembretePresoEmRepeticao",
+      "segundos": 0.099,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.dose.WebPushTransporteTest",
+      "teste": "emissorProduzPayloadCriptografadoVapidETtl",
+      "segundos": 0.393,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "cancelarPlanoConfirmadoRetorna409",
+      "segundos": 0.24,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "confirmarSemRevisarAntesRetorna409",
+      "segundos": 0.153,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "planoAtualSemPlanoConfirmadoRetorna404",
+      "segundos": 0.131,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "fluxoCompletoAteConfirmar",
+      "segundos": 0.15,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "editarVoltaDaRevisaoParaEdicao",
+      "segundos": 0.166,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "planoAtualSemSessaoRetorna401",
+      "segundos": 0.006,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "adicionarEDepoisRemoverItem",
+      "segundos": 0.159,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "planoAtualNaoMostraPlanoDeOutroPaciente",
+      "segundos": 0.394,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "planoAtualDevolveOPlanoConfirmado",
+      "segundos": 0.219,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "iniciarCadastroSemSessaoRetorna401",
+      "segundos": 0.01,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "iniciarCadastroDuasVezesRetomaOMesmoRascunho",
+      "segundos": 0.16,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "buscarPlanoDeOutroPacienteRetorna404",
+      "segundos": 0.292,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "iniciarCadastroCriaPlanoEmEdicao",
+      "segundos": 0.154,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "cancelarCadastroEmEdicaoApagaOPlano",
+      "segundos": 0.168,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "teste": "adicionarItemComDadosInvalidosRetorna400",
+      "segundos": 0.134,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.ItemDoPlanoTest",
+      "teste": "viaDeAdministracaoEOpcional",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.ItemDoPlanoTest",
+      "teste": "falhaSemNenhumHorario",
+      "segundos": 0.002,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.ItemDoPlanoTest",
+      "teste": "falhaComHorarioRepetido",
+      "segundos": 0.002,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.ItemDoPlanoTest",
+      "teste": "listaDeHorariosDevolvidaNaoPodeSerAlterada",
+      "segundos": 0.002,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.ItemDoPlanoTest",
+      "teste": "criaItemComOsDadosInformados",
+      "segundos": 0.007,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "novoPlanoComecaEmEdicaoComDataDeHoje",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "removerItemFuncionaEmEdicao",
+      "segundos": 0.005,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "editarPlanoFalhaForaDaRevisao",
+      "segundos": 0.002,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "revisarPlanoFalhaSemItens",
+      "segundos": 0.002,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "confirmarPlanoFuncionaDepoisDaRevisao",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "adicionarItemFuncionaEmEdicao",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "confirmarPlanoFalhaSemPassarPelaRevisao",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "removerItemFalhaForaDaEdicao",
+      "segundos": 0.0,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "revisarPlanoFalhaSeJaEstiverEmRevisao",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "editarPlanoVoltaParaEdicaoPreservandoOsItens",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "removerItemInexistenteLancaRecursoNaoEncontrado",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "listaDeItensDevolvidaNaoPodeSerAlterada",
+      "segundos": 0.003,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "revisarPlanoMudaParaEmRevisao",
+      "segundos": 0.001,
+      "status": "passou"
+    },
+    {
+      "classe": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "teste": "adicionarItemFalhaForaDaEdicao",
+      "segundos": 0.001,
+      "status": "passou"
+    }
+  ]
+}

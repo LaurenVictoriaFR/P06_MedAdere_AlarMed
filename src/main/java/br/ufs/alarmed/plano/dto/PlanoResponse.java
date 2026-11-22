@@ -3,6 +3,7 @@ package br.ufs.alarmed.plano.dto;
 import br.ufs.alarmed.plano.model.PlanoMedicamentoso;
 import br.ufs.alarmed.plano.model.SituacaoPlano;
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,8 @@ public record PlanoResponse(
         UUID id,
         LocalDate dataInicio,
         LocalDate dataFim,
+        Instant confirmadoEm,
+        String fusoHorario,
         SituacaoPlano situacao,
         List<ItemDoPlanoResponse> itens) {
 
@@ -26,6 +29,8 @@ public record PlanoResponse(
                 plano.getId(),
                 plano.getDataInicio(),
                 plano.getDataFim(),
+                plano.getConfirmadoEm(),
+                plano.getFusoHorario(),
                 plano.getSituacao(),
                 itens);
     }

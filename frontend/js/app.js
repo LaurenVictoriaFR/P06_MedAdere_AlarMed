@@ -120,6 +120,7 @@ async function desenhar({ manterFoco = false, focarEm = null } = {}) {
   try {
     usuario = await api.sessao();
     plano = usuario ? await api.obterPlano() : null;
+    await notificacoes.preparar(api, usuario);
   } catch (e) {
     console.error(e);
   }

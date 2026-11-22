@@ -6,11 +6,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import jakarta.persistence.LockModeType;
 
 // Acesso ao banco pro plano medicamentoso.
 // Itens e horarios nao tem repository proprio: eles sao salvos e apagados junto com o plano (composicao, DM07).
 // O Spring monta as consultas sozinho a partir do nome de cada metodo.
 public interface PlanoMedicamentosoRepository extends JpaRepository<PlanoMedicamentoso, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from PlanoMedicamentoso p where p.id = :id")
+    Optional<PlanoMedicamentoso> bloquear(UUID id);
+
+    @Query("select p.id from PlanoMedicamentoso p where p.situacao = br.ufs.alarmed.plano.model.SituacaoPlano.CONFIRMADO order by p.id")
+    List<UUID> idsConfirmados();
 
     // Busca um plano so se ele for do paciente informado.
     // Assim um paciente nunca abre o plano de outro, mesmo sabendo o id (UC-06, pos-condicao).

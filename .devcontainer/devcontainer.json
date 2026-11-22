@@ -1,0 +1,25 @@
+{
+  "name": "AlarMed Java 21 e Node 24",
+  "image": "mcr.microsoft.com/devcontainers/java:21-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "24"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "forwardPorts": [
+    8080
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "AlarMed",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    }
+  },
+  "postCreateCommand": "chmod +x mvnw",
+  "remoteUser": "vscode"
+}

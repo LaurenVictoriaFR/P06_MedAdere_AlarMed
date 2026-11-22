@@ -14,6 +14,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class TratadorGlobalDeExcecoes {
 
+    @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class})
+    public ResponseEntity<ErroResposta> tratarFormato(Exception ex) {
+        return ResponseEntity.badRequest().body(ErroResposta.de("Dados inválidos."));
+    }
+
+    @ExceptionHandler({org.springframework.dao.DataIntegrityViolationException.class,
+            org.springframework.dao.PessimisticLockingFailureException.class})
+    public ResponseEntity<ErroResposta> tratarConflito(Exception ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErroResposta.de("Os dados mudaram durante a operação. Atualize e tente novamente."));
+    }
+
     // regra de negocio quebrada -> 409
     @ExceptionHandler(RegraNegocioException.class)
     public ResponseEntity<ErroResposta> tratarRegraNegocio(RegraNegocioException ex) {

@@ -4,7 +4,7 @@
 // Estratégia: rede primeiro, cache como reserva. Assim cada atualização do
 // código aparece na hora, e o app ainda abre offline.
 
-const VERSAO = 'alarmed-v3';
+const VERSAO = 'alarmed-v4-doses';
 
 const CASCA = [
   './',
@@ -21,6 +21,7 @@ const CASCA = [
   './js/notificacoes.js',
   './js/api/api.js',
   './js/api/api-mock.js',
+  './js/api/api-http.js',
   './js/api/erros.js',
   './js/dominio/tempo.js',
   './js/dominio/plano.js',
@@ -64,6 +65,10 @@ self.addEventListener('fetch', (evento) => {
   const url = new URL(request.url);
   const ehFonte = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (url.origin !== self.location.origin && !ehFonte) return;
+  // Cache somente da casca: respostas autenticadas exigem conexão e sessão atual.
+  const caminho = url.pathname;
+  const estatico = caminho.endsWith('/') || caminho.endsWith('/index.html') || /\.(js|css|png|webp|svg|webmanifest|ico)$/.test(caminho);
+  if (!ehFonte && !estatico) return;
 
   evento.respondWith((async () => {
     const cache = await caches.open(VERSAO);
@@ -77,6 +82,20 @@ self.addEventListener('fetch', (evento) => {
       if (request.mode === 'navigate') return cache.match('./index.html');
       throw new Error('offline');
     }
+  })());
+});
+
+self.addEventListener('push', (evento) => {
+  evento.waitUntil((async () => {
+    let dados;
+    try { dados = evento.data?.json(); } catch { return; }
+    if (!dados || typeof dados.titulo !== 'string') return;
+    if (!Number.isFinite(Date.parse(dados.expiraEm)) || Date.now() >= Date.parse(dados.expiraEm)) return;
+    const hash = typeof dados.hash === 'string' && dados.hash.startsWith('#/hoje') ? dados.hash : '#/hoje';
+    await self.registration.showNotification(dados.titulo, {
+      body: dados.corpo ?? 'Toque para registrar.', tag: dados.doseId ?? 'alarmed', renotify: false,
+      icon: 'assets/icons/icon-192.png', badge: 'assets/icons/favicon-64.png', data: { hash },
+    });
   })());
 });
 
