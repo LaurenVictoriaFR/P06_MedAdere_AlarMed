@@ -1,5 +1,5 @@
 // Taxa de adesão e agregados do calendário (RF005, UC-03).
-// Taxa = tomadas ÷ (tomadas + não tomadas). Pendentes e programadas ficam fora.
+// Taxa = tomadas ÷ (tomadas + não tomadas declaradas + sem confirmação). Pendentes e programadas ficam fora.
 // Sem doses resolvidas, a taxa é null e aparece como "—".
 // Há duas taxas: a do mês do calendário e a atual, desde o início do plano.
 
@@ -18,14 +18,15 @@ export function dosesComEstado(itens, registros, data, agora) {
 //  em_andamento ainda há dose pendente ou programada
 //  todas | parte | nenhuma  conforme as tomadas entre as resolvidas
 export function resumirDia(doses) {
-  const r = { total: doses.length, tomadas: 0, naoTomadas: 0, pendentes: 0, programadas: 0 };
+  const r = { total: doses.length, tomadas: 0, naoTomadas: 0, semConfirmacao: 0, pendentes: 0, programadas: 0 };
   for (const d of doses) {
     if (d.estado === ESTADOS.TOMADA) r.tomadas += 1;
     else if (d.estado === ESTADOS.NAO_TOMADA) r.naoTomadas += 1;
+    else if (d.estado === ESTADOS.SEM_CONFIRMACAO) r.semConfirmacao += 1;
     else if (d.estado === ESTADOS.PENDENTE) r.pendentes += 1;
     else r.programadas += 1;
   }
-  const resolvidas = r.tomadas + r.naoTomadas;
+  const resolvidas = r.tomadas + r.naoTomadas + r.semConfirmacao;
   if (r.total === 0) r.agregado = 'sem_doses';
   else if (r.pendentes + r.programadas > 0) r.agregado = 'em_andamento';
   else if (r.tomadas === resolvidas) r.agregado = 'todas';
@@ -37,12 +38,14 @@ export function resumirDia(doses) {
 export function calcularTaxa(doses) {
   let tomadas = 0;
   let naoTomadas = 0;
+  let semConfirmacao = 0;
   for (const d of doses) {
     if (d.estado === ESTADOS.TOMADA) tomadas += 1;
     else if (d.estado === ESTADOS.NAO_TOMADA) naoTomadas += 1;
+    else if (d.estado === ESTADOS.SEM_CONFIRMACAO) semConfirmacao += 1;
   }
-  const resolvidas = tomadas + naoTomadas;
-  return { tomadas, naoTomadas, resolvidas, taxa: resolvidas ? tomadas / resolvidas : null };
+  const resolvidas = tomadas + naoTomadas + semConfirmacao;
+  return { tomadas, naoTomadas, semConfirmacao, resolvidas, taxa: resolvidas ? tomadas / resolvidas : null };
 }
 
 export function textoTaxa(taxa) {
@@ -93,7 +96,7 @@ export function medicamentosDoPlano(itens) {
 }
 
 // Taxa de adesão atual (UC-03 A3 e A4): doses tomadas ÷ doses passadas, do início
-// do plano até agora. Dose passada é a tomada ou a não tomada. Com `chave`, conta
+// do plano até agora. Dose passada é a tomada, a não tomada declarada ou a sem confirmação. Com `chave`, conta
 // só um medicamento; sem ela, é a taxa geral. Trocar o mês do calendário não muda
 // esta taxa (UC-03 A1).
 export function calcularTaxaAtual(itens, registros, agora, chave = null) {

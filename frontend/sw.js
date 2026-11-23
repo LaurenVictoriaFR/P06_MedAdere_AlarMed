@@ -4,7 +4,7 @@
 // Estratégia: rede primeiro, cache como reserva. Assim cada atualização do
 // código aparece na hora, e o app ainda abre offline.
 
-const VERSAO = 'alarmed-v4-doses';
+const VERSAO = 'alarmed-v5-sem-confirmacao';
 
 const CASCA = [
   './',

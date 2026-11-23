@@ -1,0 +1,27 @@
+@startuml
+hide empty description
+skinparam monochrome true
+[*] --> Programada : geração após confirmar o plano
+Programada --> Pendente : atualizar [T <= agora < F]
+Programada --> SemConfirmacao : atualizar [agora >= F]
+Pendente --> Tomada : declarar tomada [agora < F]
+Pendente --> NaoTomada : declarar não tomada [agora < F]
+Pendente --> SemConfirmacao : atualizar [agora >= F]
+Tomada --> Pendente : desfazer [agora < F]
+NaoTomada --> Pendente : desfazer [agora < F]
+Tomada --> [*] : [agora >= F] / preservar declaração
+NaoTomada --> [*] : [agora >= F] / preservar declaração
+SemConfirmacao --> [*] : sem declaração de consumo
+state "Não tomada" as NaoTomada
+state "Sem confirmação" as SemConfirmacao
+note bottom of SemConfirmacao
+Não comprova ausência de ingestão.
+registradoEm = null; registro = null.
+end note
+legend
+T = instante programado.
+F = início do minuto 121 após T ou próxima dose do mesmo item, o que ocorrer antes.
+Relógio do servidor. O minuto 120 completo pertence à janela.
+O símbolo final encerra alterações; preserva o estado persistido.
+endlegend
+@enduml

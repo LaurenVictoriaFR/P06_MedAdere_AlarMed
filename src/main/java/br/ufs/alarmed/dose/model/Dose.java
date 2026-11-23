@@ -40,9 +40,9 @@ public class Dose {
     public void atualizar(Instant agora) {
         if (estado.resolvida()) return;
         if (!agora.isBefore(fimJanela)) {
-            estado = EstadoDose.NAO_TOMADA;
+            estado = EstadoDose.SEM_CONFIRMACAO;
             automatica = true;
-            registradoEm = fimJanela;
+            registradoEm = null;
         } else if (!agora.isBefore(programadaEm)) {
             estado = EstadoDose.PENDENTE;
         }
@@ -52,7 +52,7 @@ public class Dose {
         atualizar(agora);
         if (resultado != EstadoDose.TOMADA && resultado != EstadoDose.NAO_TOMADA)
             throw new RegraNegocioException("Registro inválido.");
-        if (automatica) throw new RegraNegocioException("O prazo de 2 horas terminou. A dose conta como não tomada.");
+        if (automatica) throw new RegraNegocioException("O prazo de registro terminou. A dose ficou sem confirmação.");
         if (estado.resolvida()) throw new RegraNegocioException("Esta dose já foi registrada.");
         if (estado == EstadoDose.PROGRAMADA)
             throw new RegraNegocioException("Ainda não chegou o horário desta dose.");

@@ -20,7 +20,8 @@ class DoseTest {
         }
         Dose d = dose();
         assertThatThrownBy(() -> d.registrar(EstadoDose.TOMADA,t.plusSeconds(121*60))).hasMessageContaining("prazo");
-        assertThat(d.getEstado()).isEqualTo(EstadoDose.NAO_TOMADA);
+        assertThat(d.getEstado()).isEqualTo(EstadoDose.SEM_CONFIRMACAO);
+        assertThat(d.getRegistradoEm()).isNull();
         assertThat(d.isAutomatica()).isTrue();
     }
     @Test void minuto120InteiroAindaAceita() {

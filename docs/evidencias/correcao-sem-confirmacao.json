@@ -1,0 +1,171 @@
+{
+  "base": "5b462ee7c49049d3778cafc1a142f43fe7c70327",
+  "data_utc": "2026-11-23T00:56:20.913601+00:00",
+  "java": "Eclipse Temurin JDK 21",
+  "node": "24.22.3",
+  "h2": [
+    {
+      "name": "br.ufs.alarmed.AlarMedApplicationTests",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.WebPushTransporteTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.DoseTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "tests": "19",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.plano.model.ItemDoPlanoTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "tests": "14",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.MigracaoSemConfirmacaoTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "postgresql_16_9": [
+    {
+      "name": "br.ufs.alarmed.AlarMedApplicationTests",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.plano.controller.PlanoMedicamentosoControllerIntegrationTest",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.WebPushTransporteTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.DoseTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.DosesIntegrationTest",
+      "tests": "19",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.plano.model.ItemDoPlanoTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.plano.model.PlanoMedicamentosoTest",
+      "tests": "14",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.dose.MigracaoSemConfirmacaoTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "br.ufs.alarmed.conta.controller.ContaControllerIntegrationTest",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "frontend": {
+    "testes": 85,
+    "falhas": 0
+  },
+  "dom": "Selo e painel renderizados via jsdom com contagens separadas; não substitui ensaio visual humano.",
+  "aplicador": "Aplicação sobre a base conferida; reaplicação com alterações pendentes recusada.",
+  "fontes_sha256": {
+    "docs/BLOCO_D.md": "39dae302b431e5291a98e5fe1113cc4fefc397ad8f54f4a6fa3b2b7a109889d8",
+    "docs/CORRECAO_FEEDBACK.md": "a598135e248db89ad487de8bae7ae88cb4c8669602db2cdc189fde3cd5909e36",
+    "docs/diagramas/dose-sem-confirmacao.puml": "1595563b4cd457f954f530883b0db87998a771e6de6e2949ed092a2ab0891baf",
+    "frontend/API.md": "d9ca5b61abf73fabe7975250bb547b2660d6a2a1f187669747a30611abaec6fb",
+    "frontend/css/componentes.css": "012e1553b1a621460c23acb10271feb61a14fc11ca47b6060da5f4fd198cf91f",
+    "frontend/css/telas.css": "a779d54b90bea3cd6478d6ace90a3ed726e9da7f4f69868a3962db8c4a6edf3b",
+    "frontend/js/dominio/adesao.js": "77d4302f5771f2e772b0df6dc5d126bb409e052e8680d64e13e7f60d9765d49c",
+    "frontend/js/dominio/doses.js": "b2e86561e05b7b48945dc8180800df33fae1a16e4711bf009fb46cc273449130",
+    "frontend/js/telas/p03-hoje.js": "1a1491d5276becd61ea5cb560409ff5e5a22a7fbed70b4b2341c5385dac42d89",
+    "frontend/js/telas/p04-painel.js": "facfc446753ace65a673ad7343339139a8560453556dab444f3272175e4d1583",
+    "frontend/js/ui/componentes.js": "cbde80e6e1b17669c6f511888a5253c6e5b08b554edc893f1d18e4984f44ab1a",
+    "frontend/sw.js": "6df2b3f55d11523c126dd35cdad37c38578ca7b6c7784c296454df5c21690d5e",
+    "frontend/tests/adesao.test.js": "511b3fbae81d3aa504f3de4b2ec60e449f7cb13b688a757044ea982bab951b9e",
+    "frontend/tests/doses.test.js": "25207cfd3f17dedf9ffdf18047d957d053a9ba40c114675157830f0b5ee6336b",
+    "src/main/java/br/ufs/alarmed/dose/dto/DoseResponse.java": "4d845ec04790c39de1346a7a2ce35b0e495baa95f2ada91c5a69fecdc056f330",
+    "src/main/java/br/ufs/alarmed/dose/model/Dose.java": "f2e6d9d82243c0b6a69ddc4e8170318920a0f630e249d4b04c2d04d4b6651041",
+    "src/main/java/br/ufs/alarmed/dose/model/EstadoDose.java": "526c46a86a83c9ae0712c5c4de93075fd1219b0a220ef968f3c2aec3412d67ff",
+    "src/main/java/db/migration/V2026_11_23_1__sem_confirmacao.java": "30e3f4d66c824508b1b12a49d0ae826dbe3103dab3bde66fa8b8b448c6062086",
+    "src/test/java/br/ufs/alarmed/dose/DoseTest.java": "250b3c2bfeb5ed6d5f3c7021c4157177e0009914a560d4de38eaffc5eb1e061a",
+    "src/test/java/br/ufs/alarmed/dose/DosesIntegrationTest.java": "80348a4bb39c3845d04c6047f2f0bc6a8d44ee409252b7f6c1f6afaeb71fcb68",
+    "src/test/java/br/ufs/alarmed/dose/MigracaoSemConfirmacaoTest.java": "28d53dcd89629e8ce98f9d87f0cf615c852f92f317b1d29d0daefaa2309596d8"
+  },
+  "limites": [
+    "Não houve medição de recebimento push em 60 s.",
+    "Não houve novo ensaio de Web Push real nem inspeção visual em dispositivos.",
+    "O painel continua calculando no cliente; ASR-05 depende do Bloco E.",
+    "P1/P2/P3 atuais precisam ser consolidados com os responsáveis."
+  ]
+}

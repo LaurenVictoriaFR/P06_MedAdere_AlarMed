@@ -17,11 +17,8 @@ export function idDoCartao(idDose) {
 
 function detalhe(d, agora) {
   if (d.estado === D.ESTADOS.TOMADA) return `Registrada às ${horaHM(d.registradoEm)}`;
-  if (d.estado === D.ESTADOS.NAO_TOMADA) {
-    return d.automatica
-      ? `Sem registro até ${horaHM(d.registrarAte)}. O prazo terminou.`
-      : `Marcada às ${horaHM(d.registradoEm)}`;
-  }
+  if (d.estado === D.ESTADOS.SEM_CONFIRMACAO) return `Sem registro até ${horaHM(d.registrarAte)}. Não há declaração de consumo.`;
+  if (d.estado === D.ESTADOS.NAO_TOMADA) return `Marcada às ${horaHM(d.registradoEm)}`;
   if (d.estado === D.ESTADOS.PENDENTE) return `Registre até as ${horaHM(d.registrarAte)} · ${tempoRestante(d.registrarAte - agora)}`;
   return `Lembrete às ${d.hora}`;
 }
@@ -128,7 +125,7 @@ function cartaoLembretes(ctx) {
 
 function textoResumo(r) {
   if (r.total === 0) return 'Nenhuma dose para registrar hoje.';
-  const partes = [plural(r.tomadas, 'tomada', 'tomadas'), plural(r.naoTomadas, 'não tomada', 'não tomadas')];
+  const partes = [plural(r.tomadas, 'tomada', 'tomadas'), plural(r.naoTomadas, 'não tomada declarada', 'não tomadas declaradas'), plural(r.semConfirmacao, 'sem confirmação', 'sem confirmação')];
   const abertas = r.pendentes + r.programadas;
   if (abertas) partes.push(`${abertas} a registrar`);
   return `${plural(r.total, 'dose', 'doses')} hoje: ${partes.join(', ')}.`;

@@ -10,6 +10,6 @@ public record DoseResponse(String id, UUID itemId, LocalDate data, LocalTime hor
     public static DoseResponse de(Dose d) {
         return new DoseResponse(d.getId(), d.getItemId(), d.getDataLocal(), d.getHorario(),
                 d.getProgramadaEm(), d.getFimJanela(), d.getEstado().name().toLowerCase(Locale.ROOT),
-                d.isAutomatica(), d.getEstado().resolvida() ? RegistroResponse.de(d) : null);
+                d.isAutomatica(), d.getRegistradoEm() != null && !d.isAutomatica() ? RegistroResponse.de(d) : null);
     }
 }

@@ -33,7 +33,7 @@ confirmado continua para P4; a tela real apresenta o plano como somente leitura.
 | Método e rota | Resposta |
 | --- | --- |
 | GET /doses?de=AAAA-MM-DD&ate=AAAA-MM-DD | Lista de DoseResponse do paciente |
-| GET /registros?de=AAAA-MM-DD&ate=AAAA-MM-DD | Mapa idDose → RegistroResponse, incluindo automáticas |
+| GET /registros?de=AAAA-MM-DD&ate=AAAA-MM-DD | Mapa idDose → RegistroResponse, somente declarações do usuário; doses sem confirmação não criam registro |
 | PUT /registros/{idDose} | Recebe `{status:"tomada"}` ou `{status:"nao_tomada"}`; devolve registro |
 | DELETE /registros/{idDose} | Desfaz somente dentro da janela; 204 |
 
@@ -75,3 +75,9 @@ Formato `{mensagem, camposInvalidos}`. 400: formato/status inválido; 401: sess�
 inexistente; 404: recurso inexistente ou de outro paciente; 409: regra de negócio
 ou conflito concorrente. Falhas de rede são mostradas no cliente como erro de
 conexão, sem fallback para sucesso simulado.
+
+## Sem confirmação (correção da MOD-05)
+
+`DoseResponse.estado` também pode ser `sem_confirmacao`. Nesse estado, `automatica` é `true` e `registro` é `null`. Apenas `tomada` e `nao_tomada` são aceitos como declaração.
+
+A migração V2026.11.23.1 converte as antigas doses `NAO_TOMADA` automáticas; declarações são preservadas.

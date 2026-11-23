@@ -8,7 +8,7 @@ seguinte usa um cursor `geradoAte` e bloqueio do plano; a chave por item, data e
 horário e a restrição de unicidade do banco impedem duplicações.
 
 As doses passam de PROGRAMADA para PENDENTE ao atingir T. O servidor aceita
-TOMADA ou NAO_TOMADA na janela e marca NAO_TOMADA automática quando ela termina.
+TOMADA ou NAO_TOMADA na janela e encerra como SEM_CONFIRMACAO quando ela termina sem declaração.
 O limite acompanha os testes existentes: T+120min59s é aceito; T+121min é recusado.
 A próxima dose do mesmo item pode encerrar a janela antes. Não existe registro
 retroativo antes de T. O dia da dose é o dia de seu horário programado, mesmo
@@ -88,3 +88,7 @@ respectivos responsáveis. Não foi implementado UC-04 para ampliar escopo.
 - https://github.com/web-push-libs/webpush-java/blob/master/src/main/java/nl/martijndwars/webpush/Notification.java
 - https://datatracker.ietf.org/doc/html/rfc8291
 - https://datatracker.ietf.org/doc/html/rfc8292
+
+## Correção após o feedback da professora
+
+SEM_CONFIRMACAO não representa declaração de não ingestão, não possui registradoEm e não cria RegistroResponse. O painel separa as três contagens e mantém a taxa de registros Tomada sobre Tomada + Não tomada declarada + Sem confirmação, conforme MOD-02. Pendentes e futuras ficam fora; denominador zero resulta em —. O cálculo permanece no cliente (limitação ASR-05 a alinhar com o Bloco E). Evidências antigas descrevem a versão anterior e não substituem a nova execução.

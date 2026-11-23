@@ -1,5 +1,5 @@
 // P04 · Painel do mês (RF005, UC-03).
-// Taxa = tomadas ÷ (tomadas + não tomadas). Dose com 2 estados; dia com 3 agregados (F08).
+// Taxa = tomadas ÷ (tomadas + não tomadas declaradas + sem confirmação). Sem confirmação contada separadamente; dia com 3 agregados (F08).
 // Navegação entre meses (RF005 CA02), que faltava no protótipo.
 // Duas taxas, como no protótipo do P2: a do mês do calendário e a atual, desde o
 // início do plano, geral ou por medicamento (UC-03 A3 e A4).
@@ -21,9 +21,9 @@ const SEMANA = [
 ];
 
 const AGREGADOS = {
-  todas: { rotulo: 'Todas tomadas', icone: 'check' },
-  parte: { rotulo: 'Parte tomada', icone: 'meio' },
-  nenhuma: { rotulo: 'Nenhuma tomada', icone: 'x' },
+  todas: { rotulo: 'Todas registradas como tomadas', icone: 'check' },
+  parte: { rotulo: 'Parte registrada como tomada', icone: 'meio' },
+  nenhuma: { rotulo: 'Nenhuma registrada como tomada', icone: 'x' },
 };
 
 function descreverDia(dia) {
@@ -33,7 +33,7 @@ function descreverDia(dia) {
   if (dia.futuro) return `${quando}: ${plural(r.total, 'dose programada', 'doses programadas')}`;
   if (r.agregado === 'em_andamento') return `${quando}: ${r.tomadas} de ${r.total} tomadas até agora`;
   if (r.agregado === 'todas') return `${quando}: todas as ${r.total} doses tomadas`;
-  if (r.agregado === 'nenhuma') return `${quando}: nenhuma das ${r.total} doses tomada`;
+  if (r.agregado === 'nenhuma') return `${quando}: nenhuma das ${r.total} doses registrada como tomada; ${r.semConfirmacao} sem confirmação`;
   return `${quando}: ${r.tomadas} de ${r.total} doses tomadas`;
 }
 
@@ -90,7 +90,7 @@ function resumoDosDias(mes, atual) {
   const { todas, parte, nenhuma } = mes.contagem;
   if (todas + parte + nenhuma === 0) return 'Ainda não há dias completos neste mês.';
   const inicio = atual ? 'Até agora' : 'No mês';
-  return `${inicio}: ${plural(todas, 'dia', 'dias')} com todas as doses tomadas, ${parte} com parte e ${nenhuma} sem nenhuma tomada.`;
+  return `${inicio}: ${plural(todas, 'dia', 'dias')} com todas as doses registradas como tomadas, ${parte} com parte e ${nenhuma} sem registro de tomada.`;
 }
 
 function barraDaTaxa(taxa) {
@@ -99,7 +99,7 @@ function barraDaTaxa(taxa) {
 }
 
 function resumoDaTaxaDoMes(t) {
-  if (t.taxa === null) return 'Ainda não há doses que passaram do prazo.';
+  if (t.taxa === null) return 'Ainda não há doses declaradas ou com janela encerrada.';
   return `${t.tomadas} de ${t.resolvidas} ${t.resolvidas === 1
     ? 'dose que já passou foi registrada como tomada.'
     : 'doses que já passaram foram registradas como tomadas.'}`;
@@ -116,7 +116,8 @@ function cartaoTaxaDoMes(dados) {
     h('h2', { id: 'titulo-taxa', class: 'cartao-taxa-titulo' }, 'Taxa do mês'),
     h('p', { class: 'taxa-numero' }, textoTaxa(dados.taxa)),
     barraDaTaxa(dados.taxa),
-    h('p', {}, resumoDaTaxaDoMes(dados)));
+    h('p', {}, resumoDaTaxaDoMes(dados)),
+    h('p', {}, `${dados.tomadas} tomadas declaradas · ${dados.naoTomadas} não tomadas declaradas · ${dados.semConfirmacao} sem confirmação.`));
 }
 
 // UC-03 A3: o seletor troca entre a taxa geral e a de um medicamento.
@@ -135,7 +136,8 @@ function cartaoTaxaAtual(atual, medicamentos, escolhido, aoEscolher) {
     h('p', { class: 'so-impressao' }, nome),
     h('p', { class: 'taxa-numero' }, textoTaxa(atual.taxa)),
     barraDaTaxa(atual.taxa),
-    h('p', {}, resumoDaTaxaAtual(atual)));
+    h('p', {}, resumoDaTaxaAtual(atual)),
+    h('p', {}, `${atual.tomadas} tomadas declaradas · ${atual.naoTomadas} não tomadas declaradas · ${atual.semConfirmacao} sem confirmação.`));
 }
 
 // Só na impressão: quem, quando e a taxa atual de cada medicamento.
@@ -230,7 +232,7 @@ export default {
       h('p', {}, resumoDosDias(dados, ehAtual)),
       detalheDoDia(diaEscolhido),
       tabelaPorMedicamento(itens, registros, agora, medicamentos),
-      h('p', { class: 'nota' }, 'As taxas consideram o que foi marcado no AlarMed. Elas não comprovam que o remédio foi tomado.'),
+      h('p', { class: 'nota' }, 'Taxa = tomadas declaradas ÷ (tomadas declaradas + não tomadas declaradas + sem confirmação). Pendentes e futuras ficam fora. Sem confirmação significa ausência de declaração, não comprova que o remédio deixou de ser tomado. As taxas não comprovam adesão clínica.'),
       botao({
         texto: 'Imprimir ou salvar em PDF',
         icone: 'compartilhar',

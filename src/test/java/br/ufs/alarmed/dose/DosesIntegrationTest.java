@@ -157,7 +157,7 @@ class DosesIntegrationTest {
                 });
                 inicio.countDown(); registro.get(10,TimeUnit.SECONDS); expiracao.get(10,TimeUnit.SECONDS);
                 var finalizada = doses.findById(dose.getId()).orElseThrow();
-                assertThat(finalizada.getEstado()).isEqualTo(usuarioVenceu.get() ? EstadoDose.TOMADA : EstadoDose.NAO_TOMADA);
+                assertThat(finalizada.getEstado()).isEqualTo(usuarioVenceu.get() ? EstadoDose.TOMADA : EstadoDose.SEM_CONFIRMACAO);
                 assertThat(finalizada.isAutomatica()).isEqualTo(!usuarioVenceu.get());
             }
         }
@@ -203,7 +203,7 @@ class DosesIntegrationTest {
         String id = doseId(); inscrever(); clock.fixar(t.plusSeconds(121*60));
         processador.processar(id);
         verify(emissor,never()).enviar(any(),any(),anyInt());
-        assertThat(doses.findById(id).orElseThrow().getEstado()).isEqualTo(EstadoDose.NAO_TOMADA);
+        assertThat(doses.findById(id).orElseThrow().getEstado()).isEqualTo(EstadoDose.SEM_CONFIRMACAO);
     }
     @Test void consultaPodeExpirarDoseSemDeixarLembretePresoEmRepeticao() {
         String id = doseId(); inscrever(); clock.fixar(t);
@@ -262,4 +262,33 @@ class DosesIntegrationTest {
         }
         assertThat(doses.findByPacienteIdAndDataLocalBetweenOrderByProgramadaEm(paciente,LocalDate.of(2026,11,22),LocalDate.of(2026,11,29))).hasSize(16);
     }
+    @Test void expiracaoNaoCriaRegistroDeConsumoEApiDistingueResultado() throws Exception {
+        String id = doseId(); clock.fixar(t.plusSeconds(121*60));
+        mvc.perform(get("/doses").sessionAttr(ContaController.CHAVE_SESSAO,paciente))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].estado").value("sem_confirmacao"))
+                .andExpect(jsonPath("$[0].registro").isEmpty());
+        mvc.perform(get("/registros").sessionAttr(ContaController.CHAVE_SESSAO,paciente))
+                .andExpect(status().isOk()).andExpect(content().json("{}"));
+        var salva = doses.findById(id).orElseThrow();
+        assertThat(salva.getEstado()).isEqualTo(EstadoDose.SEM_CONFIRMACAO);
+        assertThat(salva.getRegistradoEm()).isNull();
+        mvc.perform(put("/registros/{id}",id).sessionAttr(ContaController.CHAVE_SESSAO,paciente)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"sem_confirmacao\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(delete("/registros/{id}",id).sessionAttr(ContaController.CHAVE_SESSAO,paciente))
+                .andExpect(status().isConflict());
+    }
+    @Test void declaracaoNaoTomadaPermaneceDeclaracaoDepoisDoPrazo() throws Exception {
+        String id = doseId(); clock.fixar(t.plusSeconds(20));
+        mvc.perform(put("/registros/{id}",id).sessionAttr(ContaController.CHAVE_SESSAO,paciente)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"nao_tomada\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.automatica").value(false));
+        clock.fixar(t.plusSeconds(121*60));
+        var d = leitor.ler(id,paciente);
+        assertThat(d.estado()).isEqualTo("nao_tomada");
+        assertThat(d.registro()).isNotNull();
+        assertThat(d.registro().em()).isEqualTo(t.plusSeconds(20));
+    }
+
 }
