@@ -29,7 +29,7 @@ test('agregados do dia', () => {
   assert.equal(resumirDia(d('tomada', 'pendente')).agregado, 'em_andamento');
 });
 
-test('mês com histórico: automáticas contam como não tomadas, futuro fica fora', () => {
+test('mês com histórico: sem confirmação é separada das declarações, futuro fica fora', () => {
   // Plano desde 01/10 às 07:00, uma dose às 08:00. Hoje = 05/10 às 12:00.
   const plano = planoConfirmado([item({ horarios: ['08:00'] })], em('2026-10-01', '07:00'));
   const itens = todosOsItens(plano);
@@ -37,12 +37,13 @@ test('mês com histórico: automáticas contam como não tomadas, futuro fica fo
     [idDose('i1', '2026-10-01', '08:00')]: reg('tomada', '2026-10-01', '08:10'),
     [idDose('i1', '2026-10-02', '08:00')]: reg('tomada', '2026-10-02', '08:10'),
     [idDose('i1', '2026-10-03', '08:00')]: reg('nao_tomada', '2026-10-03', '08:30'),
-    // 04/10 sem registro → não tomada automática
+    // 04/10 sem registro → sem confirmação
     [idDose('i1', '2026-10-05', '08:00')]: reg('tomada', '2026-10-05', '09:00'),
   };
   const mes = calcularMes(itens, registros, '2026-10', em('2026-10-05', '12:00'));
   assert.equal(mes.tomadas, 3);
-  assert.equal(mes.naoTomadas, 2);
+  assert.equal(mes.naoTomadas, 1);
+  assert.equal(mes.semConfirmacao, 1);
   assert.equal(textoTaxa(mes.taxa), '60%');
   assert.deepEqual(mes.contagem, { todas: 3, parte: 0, nenhuma: 2 });
   assert.equal(mes.dias[3].resumo.agregado, 'nenhuma');
@@ -73,7 +74,7 @@ function historicoDeDoisRemedios() {
   const registros = {
     [idDose('i1', '2026-09-28', '08:00')]: reg('tomada', '2026-09-28', '08:10'),
     [idDose('i1', '2026-09-29', '08:00')]: reg('tomada', '2026-09-29', '08:10'),
-    // 30/09 sem registro: não tomada automática
+    // 30/09 sem registro: sem confirmação
     [idDose('i1', '2026-10-01', '08:00')]: reg('tomada', '2026-10-01', '08:10'),
     [idDose('i1', '2026-10-02', '08:00')]: reg('tomada', '2026-10-02', '08:20'),
     [idDose('i2', '2026-09-28', '20:00')]: reg('nao_tomada', '2026-09-28', '20:30'),
@@ -120,4 +121,16 @@ test('meses disponíveis vão da primeira vigência até o mês atual', () => {
   const plano = planoConfirmado([item()], em('2026-08-20', '07:00'));
   assert.deepEqual(mesesDisponiveis(todosOsItens(plano), em('2026-10-17', '08:00')), ['2026-08', '2026-09', '2026-10']);
   assert.deepEqual(mesesDisponiveis([], em('2026-10-17', '08:00')), ['2026-10']);
+});
+
+
+test('ausência de confirmação tem contagem própria e inclui o denominador', () => {
+  const doses = ['tomada','nao_tomada','sem_confirmacao','pendente','programada'].map(estado => ({estado}));
+  const taxa = calcularTaxa(doses);
+  assert.equal(taxa.tomadas, 1); assert.equal(taxa.naoTomadas, 1);
+  assert.equal(taxa.semConfirmacao, 1); assert.equal(taxa.resolvidas, 3);
+  assert.equal(taxa.taxa, 1/3);
+  const dia = resumirDia(doses);
+  assert.equal(dia.semConfirmacao, 1); assert.equal(dia.pendentes, 1);
+  assert.equal(resumirDia([{estado:'sem_confirmacao'}]).tomadas, 0);
 });

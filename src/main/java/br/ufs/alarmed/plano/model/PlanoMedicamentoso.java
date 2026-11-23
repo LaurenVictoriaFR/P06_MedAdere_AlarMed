@@ -14,6 +14,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +42,11 @@ public class PlanoMedicamentoso {
     // opcional: fica vazio enquanto o plano estiver valendo
     @Column(name = "data_fim")
     private LocalDate dataFim;
+
+    private Instant confirmadoEm;
+    @Column(length = 60)
+    private String fusoHorario;
+    private LocalDate geradoAte;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -106,7 +113,20 @@ public class PlanoMedicamentoso {
     // UC-01 passo 7 / UC-08 passo 3: confirma o plano revisado.
     // RN01 / R03: sem passar pela revisao, o servidor bloqueia (UC-01 A2).
     public void confirmarPlano() {
+        confirmarPlano(Instant.now(), ZoneId.of("America/Maceio"));
+    }
+
+    public void confirmarPlano(Instant agora, ZoneId fuso) {
         exigirSituacao(SituacaoPlano.EM_REVISAO, "O plano precisa ser revisado antes de ser confirmado (RN01).");
+        LocalDate inicio = agora.atZone(fuso).toLocalDate();
+        for (ItemDoPlano item : itens) {
+            br.ufs.alarmed.comum.util.DuracaoTratamento.fim(item.getDuracaoTratamento(), inicio);
+            if (item.getHorarios().stream().anyMatch(h -> h.getHora().getSecond() != 0 || h.getHora().getNano() != 0))
+                throw new RegraNegocioException("Informe horários com precisão de minutos (HH:MM).");
+        }
+        this.confirmadoEm = agora;
+        this.fusoHorario = fuso.getId();
+        this.dataInicio = inicio;
         this.situacao = SituacaoPlano.CONFIRMADO;
     }
 
@@ -129,6 +149,11 @@ public class PlanoMedicamentoso {
     public LocalDate getDataInicio() {
         return dataInicio;
     }
+
+    public Instant getConfirmadoEm() { return confirmadoEm; }
+    public String getFusoHorario() { return fusoHorario; }
+    public LocalDate getGeradoAte() { return geradoAte; }
+    public void registrarGeracao(LocalDate ate) { this.geradoAte = ate; }
 
     public LocalDate getDataFim() {
         return dataFim;

@@ -11,6 +11,7 @@ export default {
   titulo: (ctx) => (P.temPlanoConfirmado(ctx.plano) ? 'Revise a alteração' : 'Revise o plano'),
 
   async render(ctx) {
+    await ctx.api.revisarPlano?.();
     const estado = estadoUi.revisao;
     const alteracao = P.temPlanoConfirmado(ctx.plano);
     const { itens, removidos } = P.compararAlteracao(ctx.plano);

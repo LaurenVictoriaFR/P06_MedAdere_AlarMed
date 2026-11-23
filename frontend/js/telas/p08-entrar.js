@@ -209,7 +209,7 @@ export default {
           tipo: 'submit',
           foco: 'enviar',
         })),
-      demoLiberada() && h('div', { class: 'entrar-demo' },
+      !ctx.api.modoReal && demoLiberada() && h('div', { class: 'entrar-demo' },
         h('p', { class: 'divisor' }, h('span', {}, 'ou')),
         botao({ texto: 'Usar dados de demonstração', icone: 'play', variante: 'secundario', aoClicar: usarDemo })),
       h('p', { class: 'entrar-nota' }, icone('info', { tamanho: 20 }),

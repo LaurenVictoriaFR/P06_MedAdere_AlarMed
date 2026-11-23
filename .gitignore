@@ -35,3 +35,8 @@ build/
 ### Segredos locais ###
 .env
 *.pem
+
+/dados-demo/
+*.log
+
+**/node_modules/

@@ -21,7 +21,7 @@ test('programada antes de T, pendente a partir de T', () => {
 });
 
 // Cenário QS-02 e risco R07: com 119 e 120 minutos o registro é aceito; com 121, recusado.
-test('janela de 2 h (QS-02): T+119 e T+120 ainda pendentes, T+121 vira não tomada automática', () => {
+test('janela de 2 h (QS-02): T+119 e T+120 ainda pendentes, T+121 vira Sem confirmação', () => {
   const { dose } = doseUnica();
   for (const hora of ['09:59', '10:00']) {
     assert.equal(estadoDaDose(dose, null, em(DIA, hora)).estado, ESTADOS.PENDENTE, hora);
@@ -30,7 +30,7 @@ test('janela de 2 h (QS-02): T+119 e T+120 ainda pendentes, T+121 vira não toma
   const fimDoMinuto120 = new Date(em(DIA, '10:00').getTime() + 59 * 1000);
   assert.equal(podeRegistrar(dose, fimDoMinuto120), true, '10:00:59 ainda conta como 120 min');
   const fim = estadoDaDose(dose, null, em(DIA, '10:01'));
-  assert.equal(fim.estado, ESTADOS.NAO_TOMADA);
+  assert.equal(fim.estado, ESTADOS.SEM_CONFIRMACAO);
   assert.equal(fim.automatica, true);
   assert.equal(motivoParaRecusarRegistro(dose, 'tomada', null, em(DIA, '10:01')), 'prazo_encerrado');
 });
@@ -46,7 +46,7 @@ test('próxima dose do mesmo medicamento antes de 2 h encurta a janela', () => {
   assert.deepEqual(fimDaJanela(dose), em(DIA, '09:00'));
   assert.deepEqual(estadoDaDose(dose, null, em(DIA, '08:00')).registrarAte, em(DIA, '08:59'));
   assert.equal(estadoDaDose(dose, null, em(DIA, '08:59')).estado, ESTADOS.PENDENTE);
-  assert.equal(estadoDaDose(dose, null, em(DIA, '09:00')).estado, ESTADOS.NAO_TOMADA);
+  assert.equal(estadoDaDose(dose, null, em(DIA, '09:00')).estado, ESTADOS.SEM_CONFIRMACAO);
 });
 
 test('dose de outro medicamento não encurta a janela', () => {
@@ -86,7 +86,7 @@ test('a dose pertence ao dia de T: a das 23h resolvida à 1h segue no dia anteri
   const { itens, dose } = doseUnica(['23:00'], '23:00');
   assert.equal(estadoDaDose(dose, null, em('2026-10-18', '00:30')).estado, ESTADOS.PENDENTE);
   assert.equal(podeRegistrar(dose, em('2026-10-18', '01:00')), true);
-  assert.equal(estadoDaDose(dose, null, em('2026-10-18', '01:01')).estado, ESTADOS.NAO_TOMADA);
+  assert.equal(estadoDaDose(dose, null, em('2026-10-18', '01:01')).estado, ESTADOS.SEM_CONFIRMACAO);
   assert.equal(dosesDoDia(itens, DIA).length, 1);
   assert.equal(dosesDoDia(itens, DIA)[0].data, DIA);
 });
@@ -117,4 +117,16 @@ test('id de dose inventado ou de horário fora do plano não é encontrado', () 
   assert.equal(encontrarDose(itens, 'qualquer-coisa'), null);
   assert.equal(encontrarDose(itens, idDose('i1', DIA, '09:00')), null);
   assert.equal(encontrarDose(itens, idDose('outro', DIA, '08:00')), null);
+});
+
+
+test('declaração não tomada e ausência de confirmação são resultados diferentes', () => {
+  const { dose } = doseUnica();
+  const declarada = {status:'nao_tomada', em:em(DIA,'08:10').toISOString()};
+  assert.equal(estadoDaDose(dose, declarada, em(DIA,'12:00')).estado, ESTADOS.NAO_TOMADA);
+  assert.equal(estadoDaDose(dose, null, em(DIA,'12:00')).estado, ESTADOS.SEM_CONFIRMACAO);
+  const legado = {...declarada, automatica:true};
+  assert.equal(estadoDaDose(dose, legado, em(DIA,'12:00')).estado, ESTADOS.SEM_CONFIRMACAO);
+  assert.equal(podeCorrigir(dose, legado, em(DIA,'08:20')), false);
+  assert.equal(motivoParaRecusarRegistro(dose,'sem_confirmacao',null,em(DIA,'08:20')), 'status_invalido');
 });

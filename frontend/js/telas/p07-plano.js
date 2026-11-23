@@ -50,13 +50,13 @@ export default {
         h('h2', { id: 'titulo-remedios', tabindex: '-1' }, `Remédios (${itens.length})`),
         itens.length
           ? h('div', { class: 'lista-itens' }, itens.map(({ item, novo }) => cartaoItem(item, {
-            novo, aoRemover: () => remover(item), foco: `remover-${item.id}`,
+            novo, aoRemover: plano.somenteLeitura ? null : () => remover(item), foco: `remover-${item.id}`,
           })))
           : vazio('Nenhum remédio no plano.')),
       removidos.length > 0 && h('section', { class: 'secao', 'aria-labelledby': 'titulo-saem' },
         h('h2', { id: 'titulo-saem' }, 'Vão sair do plano'),
         h('div', { class: 'lista-itens' }, removidos.map((item) => cartaoItem(item, { removido: true })))),
-      botao({
+      plano.somenteLeitura ? aviso({ tipo: 'info', texto: 'A alteração de um plano confirmado será disponibilizada no P4.' }) : botao({
         texto: 'Adicionar medicamento', icone: 'mais', variante: 'secundario', foco: 'adicionar',
         aoClicar: () => { limparFormularioDoCadastro(); ctx.navegar('/cadastro'); },
       }));

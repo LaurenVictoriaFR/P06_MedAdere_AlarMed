@@ -1,7 +1,11 @@
-// Interface única que as telas usam para falar com o "servidor".
-//
-// Hoje aponta para o mock (localStorage + dados sintéticos), porque o backend
-// ainda está em desenvolvimento. Quando ele existir, crie api-http.js com as
-// mesmas funções e formatos descritos em API.md e troque a linha abaixo.
-export * from './api-mock.js';
+// Interface única das telas. API real por padrão; mock somente com ?mock=1.
+// A demonstração local precisa ser escolhida explicitamente com ?mock=1.
+const mock = new URLSearchParams(globalThis.location?.search ?? '').get('mock') === '1';
+const implementacao = await import(mock ? './api-mock.js' : './api-http.js');
+export const modoReal = !mock;
+export const { sessao, criarConta, entrar, sair, obterPlano, adicionarItem, removerItem,
+  reinserirItem, descartarAlteracao, confirmarPlano, listarRegistros, registrarDose,
+  desfazerRegistro, carregarDemonstracao } = implementacao;
+export const { listarDoses, editarPlano, revisarPlano, chavePush, situacaoPush,
+  inscreverPush, enviarLembreteTeste } = implementacao;
 export { ErroApi } from './erros.js';

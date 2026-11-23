@@ -14,12 +14,19 @@ function lerAgoraDaUrl() {
   }
 }
 
-const base = lerAgoraDaUrl();
+const base = new URLSearchParams(window.location.search).get('mock') === '1' ? lerAgoraDaUrl() : null;
 const carregadoEm = Date.now();
+let servidor = null;
+let sincronizadoEm = 0;
 
 export const relogio = {
   simulado: base !== null,
+  sincronizar(iso) {
+    servidor = new Date(iso).getTime();
+    sincronizadoEm = performance.now();
+  },
   agora() {
+    if (servidor !== null) return new Date(servidor + performance.now() - sincronizadoEm);
     return base ? new Date(base.getTime() + (Date.now() - carregadoEm)) : new Date();
   },
 };

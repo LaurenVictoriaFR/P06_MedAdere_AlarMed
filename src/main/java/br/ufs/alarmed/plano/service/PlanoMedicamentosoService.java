@@ -11,6 +11,8 @@ import br.ufs.alarmed.plano.model.SituacaoPlano;
 import br.ufs.alarmed.plano.repository.PlanoMedicamentosoRepository;
 import java.util.List;
 import java.util.UUID;
+import java.time.Clock;
+import java.time.ZoneId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +24,17 @@ public class PlanoMedicamentosoService {
 
     private final PlanoMedicamentosoRepository planoRepository;
     private final ContextoPaciente contextoPaciente;
+    private final Clock relogio;
+    private final ZoneId fuso;
+    private final br.ufs.alarmed.dose.service.GeradorDoses gerador;
 
-    public PlanoMedicamentosoService(PlanoMedicamentosoRepository planoRepository, ContextoPaciente contextoPaciente) {
+    public PlanoMedicamentosoService(PlanoMedicamentosoRepository planoRepository, ContextoPaciente contextoPaciente,
+                                    Clock relogio, ZoneId fuso, br.ufs.alarmed.dose.service.GeradorDoses gerador) {
         this.planoRepository = planoRepository;
         this.contextoPaciente = contextoPaciente;
+        this.relogio = relogio;
+        this.fuso = fuso;
+        this.gerador = gerador;
     }
 
     // UC-01 passo 1: comeca o cadastro pro paciente logado.
@@ -105,7 +114,9 @@ public class PlanoMedicamentosoService {
     // UC-01 passo 7 / UC-08 passo 3: confirma o plano revisado (RN01)
     public PlanoResponse confirmarPlano(UUID planoId) {
         PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
-        plano.confirmarPlano();
+        plano.confirmarPlano(relogio.instant(), fuso);
+        planoRepository.flush();
+        gerador.gerar(planoId);
         return PlanoResponse.de(plano);
     }
 

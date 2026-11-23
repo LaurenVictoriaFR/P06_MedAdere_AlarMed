@@ -180,6 +180,7 @@ const SELOS = {
   pendente: { texto: 'Pendente', icone: 'sino' },
   tomada: { texto: 'Tomada', icone: 'check' },
   nao_tomada: { texto: 'Não tomada', icone: 'x' },
+  sem_confirmacao: { texto: 'Sem confirmação', icone: 'info' },
 };
 
 // O estado vai sempre escrito, nunca só pela cor (RNF001).

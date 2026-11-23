@@ -4,8 +4,8 @@
 // Pendente:   de T até o fim da janela.
 // Fim da janela: o que vier primeiro entre T + 120 min e a próxima dose do mesmo medicamento.
 //   O limite de 2 h é inclusivo (cenário QS-02): com 120 min ainda dá para registrar; com 121, não.
-// Tomada / Não tomada: registradas pelo usuário dentro da janela. O registro é final.
-// Sem registro até o fim da janela: Não tomada (automática).
+// Tomada / Não tomada: registradas pelo usuário dentro da janela. Podem ser desfeitas dentro da janela.
+// Sem registro até o fim da janela: Sem confirmação, sem declaração de consumo.
 // A dose pertence ao dia de T, mesmo que seja resolvida depois da meia-noite.
 
 import { deDataHora, somarDias, somarMinutos } from './tempo.js';
@@ -17,6 +17,7 @@ export const ESTADOS = Object.freeze({
   PENDENTE: 'pendente',
   TOMADA: 'tomada',
   NAO_TOMADA: 'nao_tomada',
+  SEM_CONFIRMACAO: 'sem_confirmacao',
 });
 
 export const STATUS_REGISTRAVEIS = [ESTADOS.TOMADA, ESTADOS.NAO_TOMADA];
@@ -84,6 +85,7 @@ export function proximaDose(dose) {
 // a janela fecha no início do minuto 121. A próxima dose do mesmo remédio fecha
 // a janela no horário dela.
 export function fimDaJanela(dose) {
+  if (dose.fimJanela instanceof Date) return dose.fimJanela;
   const limite = somarMinutos(dose.t, JANELA_MINUTOS + 1);
   const proxima = proximaDose(dose);
   return proxima && proxima < limite ? proxima : limite;
@@ -97,12 +99,15 @@ export function registrarAte(dose) {
 export function estadoDaDose(dose, registro, agora) {
   const fimJanela = fimDaJanela(dose);
   const ate = registrarAte(dose);
+  if (registro?.automatica) {
+    return { estado: ESTADOS.SEM_CONFIRMACAO, automatica: true, registradoEm: null, fimJanela, registrarAte: ate };
+  }
   if (registro) {
-    return { estado: registro.status, automatica: false, registradoEm: new Date(registro.em), fimJanela, registrarAte: ate };
+    return { estado: registro.status, automatica: Boolean(registro.automatica), registradoEm: new Date(registro.em), fimJanela, registrarAte: ate };
   }
   if (agora < dose.t) return { estado: ESTADOS.PROGRAMADA, automatica: false, fimJanela, registrarAte: ate };
   if (agora < fimJanela) return { estado: ESTADOS.PENDENTE, automatica: false, fimJanela, registrarAte: ate };
-  return { estado: ESTADOS.NAO_TOMADA, automatica: true, fimJanela, registrarAte: ate };
+  return { estado: ESTADOS.SEM_CONFIRMACAO, automatica: true, fimJanela, registrarAte: ate };
 }
 
 export function podeRegistrar(dose, agora) {
@@ -111,7 +116,7 @@ export function podeRegistrar(dose, agora) {
 
 // Corrigir e Desfazer só dentro da janela (RF004 E3).
 export function podeCorrigir(dose, registro, agora) {
-  return Boolean(registro) && agora < fimDaJanela(dose);
+  return Boolean(registro) && !registro.automatica && agora >= dose.t && agora < fimDaJanela(dose);
 }
 
 // Localiza a dose a partir do id e confere se ela existe no plano.

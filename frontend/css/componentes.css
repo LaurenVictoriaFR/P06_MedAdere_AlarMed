@@ -479,6 +479,7 @@
 .selo-programada { background: var(--programada-fundo); color: var(--programada-texto); }
 .selo-pendente { background: var(--pendente-fundo); color: var(--pendente-texto); }
 .selo-tomada { background: var(--tomada-fundo); color: var(--tomada-texto); }
+.selo-sem_confirmacao { background: var(--programada-fundo); color: var(--programada-texto); }
 .selo-nao_tomada { background: var(--nao-fundo); color: var(--nao-texto); }
 
 p > .selo:only-child {

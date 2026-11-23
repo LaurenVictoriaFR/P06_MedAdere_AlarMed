@@ -43,6 +43,6 @@ createServer(async (req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Não encontrado');
   }
 }).listen(PORTA, '127.0.0.1', () => {
-  console.log(`AlarMed em http://localhost:${PORTA}/`);
-  console.log(`Demonstração: http://localhost:${PORTA}/?demo=1`);
+  console.log(`Frontend isolado (mock): http://localhost:${PORTA}/?mock=1`);
+  console.log(`Demonstração: http://localhost:${PORTA}/?mock=1&demo=1`);
 });

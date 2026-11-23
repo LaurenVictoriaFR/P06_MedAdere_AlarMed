@@ -1,0 +1,6 @@
+OK: cadastro pela interface e abertura do formulário de plano
+OK: item, revisão, confirmação e dose real na tela
+OK: registro de consumo pela interface persistido no servidor
+OK: correção e registro Não tomei persistidos
+OK: painel existente abre com os registros reais
+OK: logout invalida a sessão real

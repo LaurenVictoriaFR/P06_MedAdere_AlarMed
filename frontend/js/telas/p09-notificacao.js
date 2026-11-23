@@ -44,8 +44,17 @@ export default {
       dose && notificacoes.situacao() === 'concedida' && botao({
         texto: 'Enviar um lembrete de teste', icone: 'sino', variante: 'secundario', largo: false,
         aoClicar: async () => {
-          await notificacoes.mostrarLembrete(dose);
-          mostrarToast('Lembrete de teste enviado.');
+          try {
+            if (ctx.api.modoReal) {
+              const resultado = await ctx.api.enviarLembreteTeste();
+              mostrarToast(resultado.solicitacoesAceitas > 0
+                ? 'Envio aceito pelo serviço de push. Verifique o aparelho.'
+                : 'O serviço de push recusou o teste. Tente ativar os lembretes novamente.');
+            } else {
+              await notificacoes.mostrarLembrete(dose);
+              mostrarToast('Lembrete local de teste enviado.');
+            }
+          } catch (e) { mostrarToast(e.message, { tipo: 'erro' }); }
         },
       }),
       h('a', { class: 'bloqueio-voltar', href: '#/hoje' }, 'Voltar para Doses de hoje'));

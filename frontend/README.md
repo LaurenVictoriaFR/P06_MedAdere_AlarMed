@@ -1,74 +1,24 @@
-# AlarMed: frontend
+# Frontend do AlarMed
 
-Telas do MVP do AlarMed (P06 MedAdere, COMP0503, UFS) em HTML, CSS e JavaScript,
-sem framework e sem etapa de build. Mobile-first e instalável como PWA.
+HTML, CSS e JavaScript, sem build. No modo real, a aplicação Java serve a PWA e a
+API no mesmo endereço, http://localhost:8080. Execute conforme o README da raiz.
+`js/api/api-http.js` usa sessão HTTP e dados do servidor. Nenhuma senha é guardada
+no navegador nesse modo.
 
-## Como rodar
-
-Precisa do Node 20 ou mais recente (não instala nada).
+Para trabalhar somente nas telas:
 
 ```bash
-cd frontend
 node servidor.mjs
 ```
 
-Abra <http://localhost:5173/>. Para os testes de usabilidade:
-
-| URL | Para quê |
-|---|---|
-| `/?demo=1` | Mostra o botão "Usar dados de demonstração" (conta fictícia com 45 dias de histórico) |
-| `/?demo=1&agora=2026-10-17T08:05` | Fixa o relógio no cenário do protótipo; o tempo continua correndo a partir dele |
-| `/#/estilo` | Guia de componentes e tabela de contraste |
-
-Os dados ficam no `localStorage` do navegador. Para zerar: DevTools → Application → Local Storage → apagar `alarmed:v1`.
-
-## Testes
+Abra http://localhost:5173/?mock=1&demo=1. Somente nesse modo há localStorage e
+relógio simulado (`&agora=2026-10-17T08:05`). Notificações locais do mock exigem o
+app aberto e não substituem a validação do push real.
 
 ```bash
-cd frontend
 node --test
 ```
 
-Cobrem as regras de domínio (cadastro e login do UC-05 e UC-06, validação do item,
-RN01, janela de 2 h, dia da dose, taxa do mês e taxa atual) e os pares de cor do RNF001, lidos
-de `css/tokens.css`. No CI, rodam no job `frontend`.
-
-## Telas e rotas
-
-| Tela | Rota | Requisitos |
-|---|---|---|
-| P08 Entrar / Criar conta | `#/entrar` | RF009, RF001, UC-05, UC-06 |
-| P01 Cadastro / Adicionar medicamento | `#/cadastro` | RF002, RF008, RN01, UC-01 |
-| P02 Revisão e confirmação | `#/revisao` | RF002, RF010, RN01, RN05, UC-08 |
-| P03 Doses de hoje | `#/hoje` | RF004, RN02, UC-02 |
-| P04 Painel do mês (com "Imprimir ou salvar em PDF") | `#/painel?mes=AAAA-MM` | RF005, UC-03 |
-| P07 Meu plano | `#/plano` | RF010, RN01, UC-04 |
-| P09 Lembrete (simulação) | `#/notificacao` | RF003, UC-07 |
-
-## Estrutura
-
-```
-frontend/
-├── index.html, manifest.webmanifest, sw.js, servidor.mjs
-├── css/        tokens (cores e medidas), base, componentes, telas
-├── js/
-│   ├── app.js          rotas, guardas de acesso, abas, relógio da tela
-│   ├── dominio/        regras puras, sem DOM (testadas com node --test)
-│   ├── api/            interface usada pelas telas + mock em localStorage
-│   ├── ui/             componentes, ícones, toast, formatação
-│   └── telas/          uma por tela
-├── assets/     símbolo do logo, foto do login, ícones do PWA
-└── tests/
-```
-
-Regras do código:
-
-- Nenhuma tela calcula regra de negócio: tudo passa por `js/dominio/`.
-- Texto digitado pelo usuário só entra no DOM como nó de texto (`h()` em `ui/componentes.js`), nunca como HTML.
-- O estado da dose aparece sempre escrito e com ícone, não só pela cor (RNF001).
-
-## Limitações desta versão
-
-- **Lembrete com o app fechado** depende de Web Push vindo do backend (ver `API.md`). Por enquanto, o aviso aparece com o AlarMed aberto ou em segundo plano. No iPhone, só com o app na Tela de Início (iOS 16.4+).
-- **Dados no navegador:** o mock não sincroniza entre aparelhos. O vínculo à conta (Q02) se cumpre com o backend.
-- **Senha:** o back-end guarda a senha com hash BCrypt (ADR-04 revisada), mas o mock do front a guarda como foi digitada, no navegador. Não há bloqueio de tentativas. Use só dados fictícios.
+Os testes cobrem domínio, contraste, adaptador HTTP, fuso e tratamento do evento
+push no service worker. Não substituem revisão visual nem recebimento em um
+aparelho real.
