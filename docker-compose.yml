@@ -9,5 +9,27 @@ services:
       - "5432:5432"
     volumes:
       - alarmed-data:/var/lib/postgresql/data
+    # "Pronto" é diferente de "iniciado": o app só sobe quando o Postgres aceita conexões.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-alarmed} -d ${DB_NAME:-alarmed}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      # Dentro do compose o banco é o serviço "db", não localhost.
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-alarmed}
+      DB_USER: ${DB_USER:-alarmed}
+      DB_PASSWORD: ${DB_PASSWORD:-alarmed}
+      # Push opcional: o Compose lê o .env da raiz; sem ele, ficam vazias e o push é desativado.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:contato@example.com}
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
   alarmed-data:

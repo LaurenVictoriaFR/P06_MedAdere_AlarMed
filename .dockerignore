@@ -1,0 +1,8 @@
+target
+.git
+.github
+.env
+dados-demo
+docs
+scripts
+**/node_modules

@@ -27,12 +27,36 @@ que o push está desativado. O gerador cria `.env`, lido automaticamente pelo
 Spring. Preserve esse arquivo local e nunca o envie ao GitHub. O gerador recusa
 sobrescrever chaves já existentes.
 
+## Executar com Docker
+
+Requer apenas o Docker (com Docker Compose). Não é preciso instalar Java nem Maven.
+
+```bash
+docker compose up --build
+```
+
+Quando os logs mostrarem `Started AlarMedApplication`, abra http://localhost:8080.
+Para encerrar, use `Ctrl+C` e depois `docker compose down`.
+
+- Funciona sem o arquivo `.env`: o banco usa os padrões locais e o push fica
+  desativado (a tela avisa). Para ativar o push, gere as chaves com
+  `node scripts/gerar-vapid.mjs` (seção "Primeiro teste local"); o Compose lê o
+  `.env` da raiz e repassa as chaves ao container. O `.env` nunca entra na imagem.
+- O banco PostgreSQL sobe primeiro. A aplicação só inicia depois que ele aceita
+  conexões (healthcheck), evitando falha de conexão na partida.
+- O `Dockerfile` tem duas etapas: a primeira usa JDK e Maven para gerar o JAR; a
+  segunda contém apenas o Java e o JAR, resultando em uma imagem menor e sem
+  ferramentas de compilação. Os testes não rodam no build da imagem, pois já
+  rodam na CI.
+- A CI publica o JAR como artefato (`alarmed-jar`) a cada execução na `main`.
+
 ## PostgreSQL
 
 O perfil padrão mantém PostgreSQL 16 e as variáveis DB_URL, DB_USER e DB_PASSWORD.
+Para desenvolver com o app fora do Docker, suba só o banco:
 
 ```bash
-docker compose up -d
+docker compose up -d db
 ./mvnw spring-boot:run
 ```
 
