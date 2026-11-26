@@ -13,52 +13,79 @@ export default {
 
   async render(ctx) {
     const { plano } = ctx;
+    // Há mudanças ainda não revisadas?
     const pendente = P.temAlteracaoPendente(plano);
     const { itens, removidos } = P.compararAlteracao(plano);
+    // Com a API real, o plano confirmado ainda não pode ser alterado (o UC-04 não existe no servidor).
+    const somenteLeitura = plano.somenteLeitura;
 
+    // Remover um remédio: entra na alteração pendente, com "Desfazer" no aviso.
     const remover = async (item) => {
       const { posicao } = await ctx.api.removerItem(item.id);
+      const desfazer = async () => {
+        await ctx.api.reinserirItem(item, posicao);
+        ctx.atualizar();
+      };
       mostrarToast(`${P.tituloItem(item)} vai sair do plano depois da revisão.`, {
-        acao: {
-          rotulo: 'Desfazer', icone: 'desfazer',
-          aoClicar: async () => { await ctx.api.reinserirItem(item, posicao); ctx.atualizar(); },
-        },
+        acao: { rotulo: 'Desfazer', icone: 'desfazer', aoClicar: desfazer },
       });
       await ctx.atualizar({ focarEm: '#titulo-remedios' });
     };
 
+    // Descartar: joga fora a alteração pendente; o plano confirmado continua igual.
     const descartar = async () => {
       await ctx.api.descartarAlteracao();
       mostrarToast('Alteração descartada. O plano confirmado continua valendo.');
       await ctx.atualizar({ focarEm: 'h1' });
     };
 
+    // Selo com a situação do plano, escrito e não só pela cor.
+    const selo = h('p', {},
+      h('span', { class: `selo ${pendente ? 'selo-pendente' : 'selo-tomada'}` }, pendente ? 'Alteração pendente' : 'Confirmado'));
+
+    // Com alteração pendente: explica que ainda não vale e oferece revisar ou descartar.
+    const avisoDaAlteracao = pendente && aviso({
+      tipo: 'alerta',
+      icone: 'alerta',
+      texto: 'Estas mudanças ainda não valem. Até você revisar, os lembretes seguem o plano confirmado.',
+      filhos: h('div', { class: 'aviso-acoes' },
+        botao({ texto: 'Revisar alteração', aoClicar: () => ctx.navegar('/revisao'), foco: 'revisar' }),
+        botaoTexto({ texto: 'Descartar alteração', aoClicar: descartar, foco: 'descartar' })),
+    });
+
+    // Remédios do plano. Sem o botão "Remover" quando o plano é só de leitura.
+    const cartoes = itens.map(({ item, novo }) => cartaoItem(item, {
+      novo,
+      aoRemover: somenteLeitura ? null : () => remover(item),
+      foco: `remover-${item.id}`,
+    }));
+    const secaoDosRemedios = h('section', { class: 'secao', 'aria-labelledby': 'titulo-remedios' },
+      h('h2', { id: 'titulo-remedios', tabindex: '-1' }, `Remédios (${itens.length})`),
+      itens.length ? h('div', { class: 'lista-itens' }, cartoes) : vazio('Nenhum remédio no plano.'));
+
+    // Remédios que vão sair quando a alteração for confirmada.
+    const secaoDosRemovidos = removidos.length > 0 && h('section', { class: 'secao', 'aria-labelledby': 'titulo-saem' },
+      h('h2', { id: 'titulo-saem' }, 'Vão sair do plano'),
+      h('div', { class: 'lista-itens' }, removidos.map((item) => cartaoItem(item, { removido: true }))));
+
+    // "Adicionar medicamento" abre o P01 com o formulário limpo.
+    const adicionar = () => {
+      limparFormularioDoCadastro();
+      ctx.navegar('/cadastro');
+    };
+    const rodape = somenteLeitura
+      ? aviso({ tipo: 'info', texto: 'A alteração de um plano confirmado será disponibilizada no P4.' })
+      : botao({ texto: 'Adicionar medicamento', icone: 'mais', variante: 'secundario', foco: 'adicionar', aoClicar: adicionar });
+
     return h('section', { class: 'tela' },
       cabecalho({
         titulo: 'Meu plano',
         acoes: botaoTexto({ texto: 'Sair', icone: 'sair', foco: 'sair', aoClicar: () => sairDaConta(ctx) }),
       }),
-      h('p', {}, h('span', { class: `selo ${pendente ? 'selo-pendente' : 'selo-tomada'}` }, pendente ? 'Alteração pendente' : 'Confirmado')),
-      pendente && aviso({
-        tipo: 'alerta', icone: 'alerta',
-        texto: 'Estas mudanças ainda não valem. Até você revisar, os lembretes seguem o plano confirmado.',
-        filhos: h('div', { class: 'aviso-acoes' },
-          botao({ texto: 'Revisar alteração', aoClicar: () => ctx.navegar('/revisao'), foco: 'revisar' }),
-          botaoTexto({ texto: 'Descartar alteração', aoClicar: descartar, foco: 'descartar' })),
-      }),
-      h('section', { class: 'secao', 'aria-labelledby': 'titulo-remedios' },
-        h('h2', { id: 'titulo-remedios', tabindex: '-1' }, `Remédios (${itens.length})`),
-        itens.length
-          ? h('div', { class: 'lista-itens' }, itens.map(({ item, novo }) => cartaoItem(item, {
-            novo, aoRemover: plano.somenteLeitura ? null : () => remover(item), foco: `remover-${item.id}`,
-          })))
-          : vazio('Nenhum remédio no plano.')),
-      removidos.length > 0 && h('section', { class: 'secao', 'aria-labelledby': 'titulo-saem' },
-        h('h2', { id: 'titulo-saem' }, 'Vão sair do plano'),
-        h('div', { class: 'lista-itens' }, removidos.map((item) => cartaoItem(item, { removido: true })))),
-      plano.somenteLeitura ? aviso({ tipo: 'info', texto: 'A alteração de um plano confirmado será disponibilizada no P4.' }) : botao({
-        texto: 'Adicionar medicamento', icone: 'mais', variante: 'secundario', foco: 'adicionar',
-        aoClicar: () => { limparFormularioDoCadastro(); ctx.navegar('/cadastro'); },
-      }));
+      selo,
+      avisoDaAlteracao,
+      secaoDosRemedios,
+      secaoDosRemovidos,
+      rodape);
   },
 };

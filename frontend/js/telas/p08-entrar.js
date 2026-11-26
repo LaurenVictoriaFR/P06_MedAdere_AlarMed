@@ -113,14 +113,17 @@ export default {
 
   async render(ctx) {
     const estado = estadoUi.entrar;
+    // A mesma tela serve para entrar e para criar conta; o seletor no topo troca o modo.
     const criar = estado.modo === 'criar';
 
+    // Envio do formulário. Se der certo, vai para a tela inicial; se não, mostra os erros.
     const enviar = async (evento) => {
       evento.preventDefault();
       estado.erros = {};
       estado.erroGeral = '';
       try {
         if (criar) {
+          // Mesmos campos do CadastroRequest do back-end (UC-05).
           await ctx.api.criarConta({
             nome: estado.nome,
             email: estado.email,
@@ -133,57 +136,90 @@ export default {
         } else {
           await ctx.api.entrar({ email: estado.email, senha: estado.senha });
         }
+        // A senha não fica guardada na memória da tela depois de usada.
         estado.senha = '';
         estado.confirmacaoSenha = '';
         ctx.navegar('/');
       } catch (e) {
+        // Erro de campo (400 com camposInvalidos) aparece embaixo de cada campo;
+        // qualquer outro erro (ex.: "Email ou senha inválidos.") aparece no topo do formulário.
         const campos = camposDoErro(e);
         estado.erros = campos ?? {};
         estado.erroGeral = campos ? '' : (e.message || 'Não foi possível continuar.');
+        // O foco vai para o primeiro campo com erro, na ordem da tela, ou para o erro geral.
         const primeiro = ORDEM_DOS_CAMPOS.find((c) => estado.erros[c]);
         await ctx.atualizar({ focarEm: primeiro ? `#${primeiro}` : '#erro-geral' });
       }
     };
 
+    // Só no modo de demonstração: entra numa conta fictícia com 45 dias de histórico.
     const usarDemo = async () => {
       await ctx.api.carregarDemonstracao();
       ctx.navegar('/hoje');
     };
 
+    // O e-mail é usado nos dois modos.
     const campoEmail = campoTexto(estado, 'email', {
-      rotulo: 'E-mail', tipo: 'email', icone: 'email', autocomplete: 'email', placeholder: 'nome@exemplo.com',
+      rotulo: 'E-mail',
+      tipo: 'email',
+      icone: 'email',
+      autocomplete: 'email',
+      placeholder: 'nome@exemplo.com',
       atributos: { maxlength: 120 },
     });
 
-    const campos = criar
-      ? [
+    // A data de nascimento precisa estar no passado: o máximo permitido é ontem.
+    const ontem = somarDias(dataISO(ctx.agora), -1);
+
+    // Criar conta: todos os campos do UC-05. Entrar: só e-mail e senha.
+    let campos;
+    if (criar) {
+      campos = [
         campoTexto(estado, 'nome', { rotulo: 'Seu nome', icone: 'usuario', autocomplete: 'name', atributos: { maxlength: 120 } }),
         campoTexto(estado, 'dataNascimento', {
-          rotulo: 'Data de nascimento', tipo: 'date', icone: 'calendario', autocomplete: 'bday',
-          atributos: { min: '1900-01-01', max: somarDias(dataISO(ctx.agora), -1) },
+          rotulo: 'Data de nascimento',
+          tipo: 'date',
+          icone: 'calendario',
+          autocomplete: 'bday',
+          atributos: { min: '1900-01-01', max: ontem },
         }),
         campoEmail,
         campoTexto(estado, 'telefone', {
-          rotulo: 'Telefone (opcional)', tipo: 'tel', icone: 'celular', autocomplete: 'tel', placeholder: '(79) 99999-0000',
+          rotulo: 'Telefone (opcional)',
+          tipo: 'tel',
+          icone: 'celular',
+          autocomplete: 'tel',
+          placeholder: '(79) 99999-0000',
           atributos: { maxlength: 20, inputmode: 'tel' },
         }),
+        // autocomplete "new-password" faz o gerenciador de senhas sugerir uma senha nova.
         campoSenha(estado, {
-          id: 'senha', rotulo: 'Senha', falar: 'senha', autocomplete: 'new-password',
+          id: 'senha',
+          rotulo: 'Senha',
+          falar: 'senha',
+          autocomplete: 'new-password',
           ajuda: 'De 8 a 100 caracteres, com letras e números.',
         }),
         campoSenha(estado, {
-          id: 'confirmacaoSenha', rotulo: 'Confirme a senha', falar: 'a confirmação da senha', autocomplete: 'new-password',
+          id: 'confirmacaoSenha',
+          rotulo: 'Confirme a senha',
+          falar: 'a confirmação da senha',
+          autocomplete: 'new-password',
         }),
         aceiteDosTermos(estado),
-      ]
-      : [
+      ];
+    } else {
+      campos = [
         campoEmail,
         campoSenha(estado, { id: 'senha', rotulo: 'Senha', falar: 'senha', autocomplete: 'current-password' }),
       ];
+    }
 
+    // Cartão com o formulário. O título h1 fica só para o leitor de tela; na tela aparece a marca.
     const cartao = h('section', { class: 'entrar-cartao', 'aria-labelledby': 'titulo-entrar' },
       marca({ tamanho: 'media', slogan: true, centralizada: true }),
       h('h1', { id: 'titulo-entrar', class: 'sr-only', tabindex: '-1' }, criar ? 'Criar conta no AlarMed' : 'Entrar no AlarMed'),
+      // Trocar de modo limpa os erros do modo anterior.
       segmentado({
         id: 'modo',
         rotulo: 'Como você quer continuar',
@@ -199,6 +235,7 @@ export default {
           ctx.atualizar();
         },
       }),
+      // novalidate: as mensagens de erro são as do AlarMed (iguais às do back-end), não as do navegador.
       h('form', { class: 'entrar-form', novalidate: true, onsubmit: enviar },
         estado.erroGeral && h('div', { id: 'erro-geral', tabindex: '-1' },
           aviso({ tipo: 'erro', icone: 'alerta', texto: estado.erroGeral, papel: 'alert' })),
@@ -209,12 +246,14 @@ export default {
           tipo: 'submit',
           foco: 'enviar',
         })),
+      // O botão de demonstração só aparece no modo de demonstração e com ?demo=1 na URL.
       !ctx.api.modoReal && demoLiberada() && h('div', { class: 'entrar-demo' },
         h('p', { class: 'divisor' }, h('span', {}, 'ou')),
         botao({ texto: 'Usar dados de demonstração', icone: 'play', variante: 'secundario', aoClicar: usarDemo })),
       h('p', { class: 'entrar-nota' }, icone('info', { tamanho: 20 }),
         h('span', {}, 'Versão de demonstração: use dados fictícios.')));
 
+    // Foto e enfeites são decorativos (aria-hidden); o CSS só mostra a foto e o hero no desktop.
     return h('div', { class: 'entrar' },
       h('div', { class: 'entrar-foto', 'aria-hidden': 'true' },
         h('img', { src: 'assets/img/login-fundo.webp', alt: '', width: 2192, height: 1732, loading: 'lazy', decoding: 'async' })),
