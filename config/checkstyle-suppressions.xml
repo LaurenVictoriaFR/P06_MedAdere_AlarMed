@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<!--
+  Débito técnico herdado do P3 (issue #12): arquivos que já tinham violações quando o
+  Checkstyle foi adotado. Estão isentos por inteiro; arquivos novos NÃO entram aqui.
+  Para quitar o débito, corrija o arquivo e remova a linha correspondente.
+-->
+<suppressions>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]AlarMedApplication[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]config[\\/]CacheConfig[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]config[\\/]ContextoPaciente[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]config[\\/]ContextoPacienteViaSessao[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]config[\\/]SegurancaConfig[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]config[\\/]TempoConfig[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]excecao[\\/]ErroResposta[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]excecao[\\/]NaoAutenticadoException[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]excecao[\\/]RecursoNaoEncontradoException[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]excecao[\\/]RegraNegocioException[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]excecao[\\/]TratadorGlobalDeExcecoes[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]comum[\\/]util[\\/]DuracaoTratamento[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]controller[\\/]ContaController[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]controller[\\/]SessaoController[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]dto[\\/]CadastroRequest[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]dto[\\/]ContaResponse[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]dto[\\/]LoginRequest[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]model[\\/]ContaUsuario[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]model[\\/]Paciente[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]repository[\\/]ContaUsuarioRepository[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]repository[\\/]PacienteRepository[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]conta[\\/]service[\\/]ContaService[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]agendador[\\/]AgendadorDoses[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]controller[\\/]DoseController[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]dto[\\/]DoseResponse[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]dto[\\/]RegistroResponse[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]model[\\/]Dose[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]model[\\/]EstadoDose[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]repository[\\/]DoseRepository[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]service[\\/]DoseService[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]service[\\/]GeradorDoses[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]dose[\\/]service[\\/]LeitorDose[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]controller[\\/]PushController[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]dto[\\/]InscricaoRequest[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]model[\\/]EntregaPush[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]model[\\/]InscricaoPush[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]model[\\/]Lembrete[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]repository[\\/]EntregaPushRepository[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]repository[\\/]InscricaoPushRepository[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]repository[\\/]LembreteRepository[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]service[\\/]EmissorPush[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]service[\\/]InscricaoService[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]service[\\/]ProcessadorLembrete[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]service[\\/]WebPushEmissor[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]controller[\\/]PlanoMedicamentosoController[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]controller[\\/]RascunhoController[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]dto[\\/]ItemDoPlanoRequest[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]dto[\\/]ItemDoPlanoResponse[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]dto[\\/]PlanoResponse[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]model[\\/]HorarioProgramado[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]model[\\/]ItemDoPlano[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]model[\\/]PlanoMedicamentoso[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]model[\\/]SituacaoPlano[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]repository[\\/]PlanoMedicamentosoRepository[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]service[\\/]PlanoMedicamentosoService[.]java" checks=".*"/>
+  <suppress files="src[\\/]main[\\/]java[\\/]db[\\/]migration[\\/]V2026_11_23_1__sem_confirmacao[.]java" checks=".*"/>
+</suppressions>
