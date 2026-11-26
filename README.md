@@ -70,6 +70,29 @@ npm --prefix scripts/qa test
 Use apenas em um ambiente de desenvolvimento com dados sintéticos. Esse ensaio
 não substitui revisão visual em navegador nem teste de push em aparelho real.
 
+## Estilo de código (Checkstyle)
+
+O back-end usa o Checkstyle com o conjunto de regras Google checks, que padroniza o
+estilo e a legibilidade do código (imports, Javadoc, tamanho de linha, entre outros).
+A indentação foi ajustada para 4 espaços, padrão do código já existente.
+
+Para verificar localmente antes de abrir a PR:
+
+```bash
+./mvnw validate
+```
+
+O `./mvnw verify` e a CI também executam essa verificação. Havendo violação, o build
+falha e a mensagem indica a regra e a linha.
+
+O arquivo `config/checkstyle-suppressions.xml` isenta 56 arquivos herdados do P3,
+cujas violações são, em sua maioria, estéticas. O grupo decidiu aceitá-las como débito
+técnico e exigir o padrão nos arquivos novos. A isenção vale para o arquivo inteiro:
+um arquivo antigo editado continua isento enquanto estiver nessa lista.
+
+Para quitar o débito de um arquivo, corrija as violações dele e remova a linha
+correspondente em `config/checkstyle-suppressions.xml`.
+
 ## Lembretes com o app fechado
 
 1. Gere as chaves VAPID antes de iniciar a aplicação.
