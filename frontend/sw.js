@@ -4,7 +4,11 @@
 // Estratégia: rede primeiro, cache como reserva. Assim cada atualização do
 // código aparece na hora, e o app ainda abre offline.
 
-const VERSAO = 'alarmed-v5-sem-confirmacao';
+// Mudar a versão a cada mudança na lista abaixo: o service worker novo apaga o cache antigo.
+const VERSAO = 'alarmed-v6-p4';
+
+// Tudo o que o app precisa para abrir sem internet. O teste tests/service-worker.test.js
+// confere se todo arquivo do front está aqui.
 
 const CASCA = [
   './',
@@ -24,6 +28,7 @@ const CASCA = [
   './js/api/api-http.js',
   './js/api/erros.js',
   './js/dominio/tempo.js',
+  './js/dominio/conta.js',
   './js/dominio/plano.js',
   './js/dominio/doses.js',
   './js/dominio/adesao.js',
@@ -44,6 +49,9 @@ const CASCA = [
   './assets/img/simbolo.png',
   './assets/img/login-fundo.webp',
   './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png',
+  './assets/icons/icon-maskable-512.png',
+  './assets/icons/apple-touch-icon.png',
   './assets/icons/favicon-64.png',
 ];
 

@@ -236,7 +236,7 @@ body[data-tela="entrar"] {
 
 .cartao-dose.estado-pendente { --cor-estado: #C98A2E; }
 .cartao-dose.estado-tomada { --cor-estado: var(--verde); }
-.cartao-dose.estado-sem_confirmacao { --cor-estado: #586474; }
+.cartao-dose.estado-sem_confirmacao { --cor-estado: #6B5E92; }
 .cartao-dose.estado-nao_tomada { --cor-estado: #B54848; }
 
 .cartao-dose.destaque {
@@ -792,6 +792,11 @@ body[data-tela="notificacao"] {
     border-right: 1px solid var(--borda);
   }
 
+  /* Com o relógio simulado, o trilho lateral começa abaixo da faixa do topo (base.css). */
+  html[data-relogio="simulado"] .abas {
+    top: var(--altura-faixa-relogio);
+  }
+
   .abas-marca {
     display: block;
     padding: 0 8px;
@@ -1026,6 +1031,10 @@ body[data-tela="notificacao"] {
 
   html[data-relogio="simulado"] body::after {
     display: none;
+  }
+
+  html[data-relogio="simulado"] body {
+    padding-top: 0;
   }
 
   .abas,

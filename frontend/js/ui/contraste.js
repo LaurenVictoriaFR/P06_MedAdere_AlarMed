@@ -37,6 +37,7 @@ export const PARES_DE_COR = [
   ['--nao-texto', '--nao-fundo', 4.5],
   ['--pendente-texto', '--pendente-fundo', 4.5],
   ['--programada-texto', '--programada-fundo', 4.5],
+  ['--sem-confirmacao-texto', '--sem-confirmacao-fundo', 4.5],
   ['--info-texto', '--info-fundo', 4.5],
   ['--dia-todas-texto', '--dia-todas', 4.5],
   ['--dia-parte-texto', '--dia-parte', 4.5],

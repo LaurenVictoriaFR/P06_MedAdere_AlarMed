@@ -170,15 +170,27 @@ input::placeholder {
   }
 }
 
-/* Faixa discreta quando o relógio está simulado (?agora=), para não confundir nos testes. */
+/* Faixa no topo quando o relógio está simulado (?agora=), para não confundir nos testes.
+   O conteúdo desce a altura da faixa, para ela não cobrir nenhum botão (ex.: "Sair"). */
+html[data-relogio="simulado"] {
+  --altura-faixa-relogio: 24px;
+}
+
+html[data-relogio="simulado"] body {
+  padding-top: var(--altura-faixa-relogio);
+}
+
 html[data-relogio="simulado"] body::after {
   content: "Relógio simulado";
   position: fixed;
-  top: 8px;
-  right: 8px;
+  top: 0;
+  right: 0;
+  left: 0;
   z-index: 60;
-  padding: 2px 10px;
-  border-radius: var(--raio-pilula);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--altura-faixa-relogio);
   background: var(--pendente-fundo);
   color: var(--pendente-texto);
   font-size: var(--t-legenda);
