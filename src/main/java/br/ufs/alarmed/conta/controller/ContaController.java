@@ -11,6 +11,7 @@ import br.ufs.alarmed.conta.dto.ContaResponse;
 import br.ufs.alarmed.conta.dto.LoginRequest;
 import br.ufs.alarmed.conta.model.Paciente;
 import br.ufs.alarmed.conta.service.ContaService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
@@ -28,17 +29,20 @@ public class ContaController {
  // UC-05: cadastro
  @PostMapping("/contas")
  @ResponseStatus(HttpStatus.CREATED)
- public ContaResponse cadastrar(@Valid @RequestBody CadastroRequest request, HttpSession sessao) {
+ public ContaResponse cadastrar(@Valid @RequestBody CadastroRequest request,HttpServletRequest requisicao, HttpSession sessao) {
 	 Paciente paciente = contaService.cadastrar(request);
+	 requisicao.changeSessionId();
 	 sessao.setAttribute(CHAVE_SESSAO, paciente.getId());
 	 return ContaResponse.de(paciente);
  }
 
  // UC-06: login
  @PostMapping("/login")
- public ContaResponse entrar(@Valid @RequestBody LoginRequest request, HttpSession sessao) {
-	 Paciente paciente = contaService.entrar(request);
-	 sessao.setAttribute(CHAVE_SESSAO, paciente.getId());
-	 return ContaResponse.de(paciente);
- }
+ public ContaResponse entrar(@Valid @RequestBody LoginRequest request,
+	        HttpServletRequest requisicao, HttpSession sessao) {
+	    Paciente paciente = contaService.entrar(request);
+	    requisicao.changeSessionId();  
+	    sessao.setAttribute(CHAVE_SESSAO, paciente.getId());
+	    return ContaResponse.de(paciente);
+	}
 }
