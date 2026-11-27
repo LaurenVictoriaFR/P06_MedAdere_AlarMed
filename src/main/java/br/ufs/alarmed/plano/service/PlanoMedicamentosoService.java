@@ -1,15 +1,19 @@
 package br.ufs.alarmed.plano.service;
 
 import br.ufs.alarmed.comum.config.ContextoPaciente;
+import br.ufs.alarmed.comum.excecao.DadosInvalidosException;
 import br.ufs.alarmed.comum.excecao.RecursoNaoEncontradoException;
 import br.ufs.alarmed.comum.excecao.RegraNegocioException;
 import br.ufs.alarmed.dose.repository.DoseRepository;
 import br.ufs.alarmed.dose.service.GeradorDoses;
 import br.ufs.alarmed.plano.dto.ItemDoPlanoRequest;
 import br.ufs.alarmed.plano.dto.PlanoResponse;
+import br.ufs.alarmed.plano.model.FormatoImagem;
+import br.ufs.alarmed.plano.model.FotoCaixa;
 import br.ufs.alarmed.plano.model.ItemDoPlano;
 import br.ufs.alarmed.plano.model.PlanoMedicamentoso;
 import br.ufs.alarmed.plano.model.SituacaoPlano;
+import br.ufs.alarmed.plano.repository.FotoCaixaRepository;
 import br.ufs.alarmed.plano.repository.PlanoMedicamentosoRepository;
 import java.time.Clock;
 import java.time.Instant;
@@ -19,8 +23,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// UC-01, UC-04 e UC-08: cadastrar o plano, alterar o plano confirmado, colocar/tirar
-// medicamentos, revisar, corrigir, confirmar e cancelar o que ainda nao foi confirmado.
+// UC-01, UC-04 e UC-08: cadastrar o plano, alterar o plano confirmado, colocar/editar/tirar
+// medicamentos (e a foto da caixa, RF008), revisar, corrigir, confirmar e cancelar o que
+// ainda nao foi confirmado.
 @Service
 @Transactional
 public class PlanoMedicamentosoService {
@@ -30,16 +35,18 @@ public class PlanoMedicamentosoService {
 
     private final PlanoMedicamentosoRepository planoRepository;
     private final DoseRepository doseRepository;
+    private final FotoCaixaRepository fotoRepository;
     private final ContextoPaciente contextoPaciente;
     private final Clock relogio;
     private final ZoneId fuso;
     private final GeradorDoses gerador;
 
     public PlanoMedicamentosoService(PlanoMedicamentosoRepository planoRepository, DoseRepository doseRepository,
-                                    ContextoPaciente contextoPaciente, Clock relogio, ZoneId fuso,
-                                    GeradorDoses gerador) {
+                                    FotoCaixaRepository fotoRepository, ContextoPaciente contextoPaciente,
+                                    Clock relogio, ZoneId fuso, GeradorDoses gerador) {
         this.planoRepository = planoRepository;
         this.doseRepository = doseRepository;
+        this.fotoRepository = fotoRepository;
         this.contextoPaciente = contextoPaciente;
         this.relogio = relogio;
         this.fuso = fuso;
@@ -48,6 +55,10 @@ public class PlanoMedicamentosoService {
 
     // resultado do iniciarAlteracao: o controller devolve 201 se criou e 200 se retomou
     public record AlteracaoIniciada(PlanoResponse plano, boolean criada) {
+    }
+
+    // foto da caixa pronta pra resposta: os bytes e o Content-Type (RF008)
+    public record FotoDoItem(byte[] conteudo, String tipo) {
     }
 
     // UC-01 passo 1: comeca o cadastro pro paciente logado.
@@ -121,26 +132,79 @@ public class PlanoMedicamentosoService {
         PlanoMedicamentoso versaoNova = plano.iniciarAlteracao();
         // flush pra os itens copiados ja voltarem com id na resposta
         planoRepository.saveAndFlush(versaoNova);
+        // RF008: a copia mantem a foto do original (copiada no banco, sem passar pela aplicacao)
+        for (ItemDoPlano copia : versaoNova.getItens()) {
+            if (copia.temFoto()) {
+                fotoRepository.copiar(copia.getItemOrigemId(), copia.getId());
+            }
+        }
         return new AlteracaoIniciada(PlanoResponse.de(versaoNova), true);
     }
 
     // UC-01 passos 2 a 4 / UC-04 passo 4: adiciona um medicamento ao plano
     public PlanoResponse adicionarItem(UUID planoId, ItemDoPlanoRequest request) {
         PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        plano.adicionarItem(montarItem(request));
+        // forca o cascade-persist agora: so assim o item ganha o id antes de virar resposta
+        // (sem isso, o id so sai preenchido no flush de fim de transacao, tarde demais pro DTO)
+        planoRepository.saveAndFlush(plano);
+        return PlanoResponse.de(plano);
+    }
 
-        ItemDoPlano item = new ItemDoPlano(
+    // BL-06 / UC-04 passo 4: edita o medicamento no lugar. Mantem o id, o item de origem,
+    // o inicio do tratamento e a foto; so vale com o plano em edicao.
+    public PlanoResponse atualizarItem(UUID planoId, UUID itemId, ItemDoPlanoRequest request) {
+        PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        plano.atualizarItem(itemId, montarItem(request));
+        planoRepository.saveAndFlush(plano);
+        return PlanoResponse.de(plano);
+    }
+
+    // RF008: grava ou troca a foto da caixa. O formato vem dos bytes, nao do nome do arquivo.
+    public void salvarFoto(UUID planoId, UUID itemId, byte[] conteudo) {
+        PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        if (conteudo == null || conteudo.length == 0) {
+            throw new DadosInvalidosException("Envie a foto da caixa.");
+        }
+        if (conteudo.length > FotoCaixa.TAMANHO_MAXIMO) {
+            throw new DadosInvalidosException("A foto pode ter no máximo 2 MB.");
+        }
+        FormatoImagem formato = FormatoImagem.detectar(conteudo)
+                .orElseThrow(() -> new DadosInvalidosException("Envie a foto em JPEG, PNG ou WebP."));
+
+        plano.definirFotoDoItem(itemId, formato);
+        fotoRepository.save(new FotoCaixa(itemId, conteudo));
+    }
+
+    // RF008: devolve a foto com o tipo original; 404 se o item nao tiver foto
+    @Transactional(readOnly = true)
+    public FotoDoItem buscarFoto(UUID planoId, UUID itemId) {
+        ItemDoPlano item = buscarPlanoDoPaciente(planoId).buscarItem(itemId);
+        if (!item.temFoto()) {
+            throw new RecursoNaoEncontradoException("Este medicamento não tem foto.");
+        }
+        FotoCaixa foto = fotoRepository.findById(itemId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Este medicamento não tem foto."));
+        return new FotoDoItem(foto.getConteudo(), item.getFotoTipo());
+    }
+
+    // RF008: tira a foto do item (sem foto, nao faz nada)
+    public void removerFoto(UUID planoId, UUID itemId) {
+        PlanoMedicamentoso plano = buscarPlanoDoPaciente(planoId);
+        plano.removerFotoDoItem(itemId);
+        fotoRepository.findById(itemId).ifPresent(fotoRepository::delete);
+    }
+
+    // monta o item a partir do corpo; o construtor confere horarios vazios ou repetidos
+    private ItemDoPlano montarItem(ItemDoPlanoRequest request) {
+        return new ItemDoPlano(
                 request.nomeMedicamento(),
                 request.dosagem(),
                 request.viaAdministracao(),
                 request.frequencia(),
                 request.duracaoTratamento(),
-                request.horarios());
-
-        plano.adicionarItem(item);
-        // forca o cascade-persist agora: so assim o item ganha o id antes de virar resposta
-        // (sem isso, o id so sai preenchido no flush de fim de transacao, tarde demais pro DTO)
-        planoRepository.saveAndFlush(plano);
-        return PlanoResponse.de(plano);
+                request.horarios(),
+                request.observacao());
     }
 
     // UC-01 / UC-04 passo 4: tira um medicamento do plano

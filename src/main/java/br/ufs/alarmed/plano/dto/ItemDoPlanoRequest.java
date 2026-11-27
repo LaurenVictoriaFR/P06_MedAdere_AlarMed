@@ -16,8 +16,10 @@ import java.util.List;
 //   "viaAdministracao": "oral",
 //   "frequencia": "12 em 12 horas",
 //   "duracaoTratamento": "uso continuo",
-//   "horarios": ["08:00", "20:00"]
+//   "horarios": ["08:00", "20:00"],
+//   "observacao": "tomar depois do cafe"
 // }
+// O mesmo corpo serve pra editar o item no lugar (PUT, BL-06).
 public record ItemDoPlanoRequest(
 
         @NotBlank(message = "Informe o nome do medicamento.")
@@ -42,5 +44,10 @@ public record ItemDoPlanoRequest(
         String duracaoTratamento,
 
         @NotEmpty(message = "Informe ao menos um horário.")
-        List<@NotNull(message = "Horário inválido.") LocalTime> horarios) {
+        @HorariosSemRepeticao
+        List<@NotNull(message = "Horário inválido.") LocalTime> horarios,
+
+        // opcional: observacao livre da receita (ex.: "tomar em jejum")
+        @Size(max = 500, message = "A observação pode ter no máximo 500 caracteres.")
+        String observacao) {
 }

@@ -17,6 +17,7 @@ public record ItemDoPlanoResponse(
         String frequencia,
         String duracaoTratamento,
         List<LocalTime> horarios,
+        String observacao,
         // UC-04: item do plano anterior de onde a copia veio; null pra item novo
         UUID itemOrigemId,
         // inicio da contagem da duracao; null antes de confirmar
@@ -37,8 +38,9 @@ public record ItemDoPlanoResponse(
                 item.getFrequencia(),
                 item.getDuracaoTratamento(),
                 horas,
+                item.getObservacao(),
                 item.getItemOrigemId(),
                 item.getInicioTratamento(),
-                item.getFotoCaixa() != null);
+                item.temFoto());
     }
 }
