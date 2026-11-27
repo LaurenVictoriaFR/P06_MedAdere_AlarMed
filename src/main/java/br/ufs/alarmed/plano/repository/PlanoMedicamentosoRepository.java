@@ -2,6 +2,7 @@ package br.ufs.alarmed.plano.repository;
 
 import br.ufs.alarmed.plano.model.PlanoMedicamentoso;
 import br.ufs.alarmed.plano.model.SituacaoPlano;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +30,9 @@ public interface PlanoMedicamentosoRepository extends JpaRepository<PlanoMedicam
     // Planos de um paciente numa situacao. Ex.: o plano CONFIRMADO dele,
     // ou um cadastro EM_EDICAO que ficou pela metade.
     List<PlanoMedicamentoso> findByPacienteIdAndSituacao(UUID pacienteId, SituacaoPlano situacao);
+
+    // Rascunho do paciente (cadastro ou alteracao), em EM_EDICAO ou EM_REVISAO (TD-08, QP-07).
+    List<PlanoMedicamentoso> findByPacienteIdAndSituacaoIn(UUID pacienteId, Collection<SituacaoPlano> situacoes);
 
     // Todos os planos numa situacao. Pensado pro Bloco D, que gera as doses
     // a partir dos planos CONFIRMADOS (DM02).

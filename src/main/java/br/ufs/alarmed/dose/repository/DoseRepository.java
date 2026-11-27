@@ -15,6 +15,14 @@ public interface DoseRepository extends JpaRepository<Dose, String> {
     @Query("select d from Dose d where d.id = :id")
     Optional<Dose> bloquear(String id);
 
+    // UC-04 (DM09, Q-01): ao confirmar a alteracao, as doses do plano antigo que ainda
+    // nao chegaram no horario saem; Pendentes e ja registradas ficam. Dose futura ainda
+    // nao tem Lembrete (ele so nasce no horario), entao nao ha FK pendurada.
+    @Modifying(flushAutomatically = true)
+    @Query("delete from Dose d where d.planoId = :planoId and d.programadaEm > :agora "
+            + "and d.estado = br.ufs.alarmed.dose.model.EstadoDose.PROGRAMADA")
+    int apagarProgramadasFuturas(UUID planoId, Instant agora);
+
     @Query("select d.id from Dose d where d.programadaEm <= :agora and (d.estado in :estados or d.id in "
             + "(select l.id from Lembrete l where l.situacao in ('AGUARDANDO','REPETIR','PARCIAL','SEM_INSCRICAO','DESATIVADO'))) "
             + "order by d.programadaEm, d.id")
