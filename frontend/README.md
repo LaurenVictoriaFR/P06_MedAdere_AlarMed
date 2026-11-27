@@ -38,7 +38,8 @@ node --test     # testes
 
 Os testes cobrem as regras de domínio (cadastro e login do UC-05 e UC-06, validação
 do item, RN01, janela de 2 h com Sem confirmação, dia da dose, taxa do mês e taxa
-atual), o adaptador HTTP, o fuso do servidor, o evento push no service worker e os
+atual), o adaptador HTTP (inclusive a alteração do plano do UC-04, contra um servidor
+falso que segue o contrato), o fuso do servidor, o evento push no service worker e os
 pares de cor do RNF001, lidos de `css/tokens.css`. Não substituem a revisão visual
 nem o recebimento do push num aparelho real. No CI, o linter e os testes rodam no
 job `frontend`.
@@ -85,8 +86,8 @@ Regras do código:
 
 ## Limitações desta versão
 
-- **Foto da caixa e observação:** com a API real, não são enviadas; o back-end ainda não tem esses campos.
-- **Alterar o plano (P07):** com a API real, o plano confirmado fica só para leitura até o UC-04 existir no servidor.
+- **Foto da caixa e observação:** com a API real, ainda não são enviadas: o servidor ainda não tem as rotas da foto (RF008) nem o campo de observação.
+- **Alterar o plano (P07):** funciona com a API real (UC-04). A mudança fica pendente até a revisão no P02, e o plano confirmado continua valendo até lá. Editar um item ainda é remover e adicionar de novo. "Desfazer" uma remoção só devolve o item igual quando ela foi a única mudança; nos outros casos, o remédio volta como item novo.
 - **Painel:** as taxas são calculadas no aparelho, com as doses e os registros do servidor.
 - **Push:** o recebimento com o app fechado ainda não foi validado num aparelho real. No iPhone, só com o app na Tela de Início (iOS 16.4+).
 - **Login:** sem bloqueio por tentativas, e a sessão fica na memória do servidor. Use só dados fictícios.
