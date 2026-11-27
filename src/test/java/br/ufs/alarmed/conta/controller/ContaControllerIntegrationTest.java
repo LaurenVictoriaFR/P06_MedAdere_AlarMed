@@ -170,8 +170,63 @@ class ContaControllerIntegrationTest {
                 .andExpect(jsonPath("$.camposInvalidos.senha").exists());
     }
 
+    @Test
+    void loginBemSucedidoRenovaOIdentificadorDaSessao() throws Exception {
+        cadastrar("lauren@exemplo.test", SENHA, SENHA, true).andExpect(status().isCreated());
+        MockHttpSession antes = new MockHttpSession();
+        String idAntes = antes.getId();
+
+        login("lauren@exemplo.test", SENHA, antes)
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(result.getRequest().getSession(false).getId())
+                        .isNotEqualTo(idAntes));
+    }
+
+    @Test
+    void loginMalsucedidoNaoCriaSessaoAutenticada() throws Exception {
+        cadastrar("lauren@exemplo.test", SENHA, SENHA, true).andExpect(status().isCreated());
+        MockHttpSession antes = new MockHttpSession();
+        String idAntes = antes.getId();
+
+        login("lauren@exemplo.test", "senhaErrada1", antes)
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> {
+                    assertThat(antes.getAttribute(ContaController.CHAVE_SESSAO)).isNull();
+                    assertThat(antes.getId()).isEqualTo(idAntes);
+                });
+    }
+
+    @Test
+    void cadastroRenovaOIdentificadorDaSessao() throws Exception {
+        MockHttpSession antes = new MockHttpSession();
+        String idAntes = antes.getId();
+
+        cadastrar("lauren@exemplo.test", SENHA, SENHA, true, antes)
+                .andExpect(status().isCreated())
+                .andExpect(result -> assertThat(result.getRequest().getSession(false).getId())
+                        .isNotEqualTo(idAntes));
+    }
+
+    @Test
+    void aposOLogoutOIdentificadorAntigoNaoDaMaisAcesso() throws Exception {
+        cadastrar("lauren@exemplo.test", SENHA, SENHA, true).andExpect(status().isCreated());
+        MockHttpSession sessao = (MockHttpSession) login("lauren@exemplo.test", SENHA)
+                .andReturn().getRequest().getSession(false);
+        mockMvc.perform(post("/planos").session(sessao)).andExpect(status().isOk());
+
+        mockMvc.perform(post("/logout").session(sessao)).andExpect(status().isNoContent());
+
+        assertThat(sessao.isInvalid()).isTrue();
+        mockMvc.perform(post("/planos").session(sessao)).andExpect(status().isUnauthorized());
+    }
+
     private ResultActions cadastrar(String email, String senha, String confirmacao, boolean aceiteTermos)
             throws Exception {
+        return cadastrar(email, senha, confirmacao, aceiteTermos, new MockHttpSession());
+    }
+
+    private ResultActions cadastrar(String email, String senha, String confirmacao, boolean aceiteTermos,
+            MockHttpSession sessao) throws Exception {
         String corpo = """
                 {
                   "nome": "Lauren",
@@ -184,11 +239,16 @@ class ContaControllerIntegrationTest {
                 """.formatted(email, senha, confirmacao, aceiteTermos);
 
         return mockMvc.perform(post("/contas")
+                .session(sessao)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(corpo));
     }
 
     private ResultActions login(String email, String senha) throws Exception {
+        return login(email, senha, new MockHttpSession());
+    }
+
+    private ResultActions login(String email, String senha, MockHttpSession sessao) throws Exception {
         String corpo = """
                 {
                   "email": "%s",
@@ -197,6 +257,7 @@ class ContaControllerIntegrationTest {
                 """.formatted(email, senha);
 
         return mockMvc.perform(post("/login")
+                .session(sessao)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(corpo));
     }
