@@ -25,8 +25,26 @@ sessão e converte respostas no formato das telas.
 PlanoResponse acrescenta confirmadoEm (Instant), fusoHorario (ZoneId textual).
 A duração por item continua em texto validado. O adaptador traduz concentração e
 quantidade para dosagem, como `50 mg · 1 comprimido` (até 60 caracteres).
-Observações estruturadas e fotos não são salvas no MVP real. Alteração de plano
-confirmado continua para P4; a tela real apresenta o plano como somente leitura.
+Observações estruturadas não são salvas no MVP real.
+
+## Alterar plano confirmado (UC-04)
+
+Contrato completo em `docs/CONTRATO_BLOCO_C.md` (Bloco C). Como o front usa:
+
+| Momento na tela | Rota |
+| --- | --- |
+| Abrir o app | `GET /planos/atual` e `GET /planos/rascunho`. Um rascunho com `planoAnteriorId` igual ao id do plano confirmado é a alteração pendente |
+| Primeira mudança no P07 ou no P01 (remover ou adicionar) | `POST /planos/{idConfirmado}/alteracao` abre a versão em edição, com cópia dos itens. Abrir a tela sozinho não cria nada |
+| Remover ou adicionar na alteração | `DELETE` e `POST` nos itens da versão em edição (`{idNovo}`) |
+| "Desfazer" uma remoção | Se ela foi a única mudança, `DELETE /planos/{idNovo}` cancela a alteração e o plano volta como estava; senão, o remédio volta como item novo |
+| Abrir o P02, "Voltar e editar", "Confirmar e salvar" | `revisar`, `editar` e `confirmar` na versão em edição. Na confirmação, o servidor encerra a versão anterior |
+| "Descartar alteração" | `DELETE /planos/{idNovo}` (UC-04 A3); o plano confirmado continua valendo |
+| Histórico depois de uma alteração | `GET /planos/{id}` seguindo `planoAnteriorId`. Os itens das versões anteriores entram em `encerrados`, com `encerradoEm` igual à confirmação da versão seguinte, para o painel e as doses antigas acharem o remédio |
+
+Na alteração, a cópia de um item aparece nas telas com o id do original
+(`itemOrigemId`), para o P07 e o P02 reconhecerem o mesmo remédio dos dois lados; o
+id da cópia fica em `idServidor`. Com um servidor que ainda não manda
+`planoAnteriorId`, o plano confirmado fica só para leitura.
 
 ## Doses e registros
 

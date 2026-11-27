@@ -16,7 +16,7 @@ export default {
     // Há mudanças ainda não revisadas?
     const pendente = P.temAlteracaoPendente(plano);
     const { itens, removidos } = P.compararAlteracao(plano);
-    // Com a API real, o plano confirmado ainda não pode ser alterado (o UC-04 não existe no servidor).
+    // Só fica só para leitura com um servidor antigo, que ainda não tem o UC-04 (alteração do plano).
     const somenteLeitura = plano.somenteLeitura;
 
     // Remover um remédio: entra na alteração pendente, com "Desfazer" no aviso.
@@ -74,7 +74,7 @@ export default {
       ctx.navegar('/cadastro');
     };
     const rodape = somenteLeitura
-      ? aviso({ tipo: 'info', texto: 'A alteração de um plano confirmado será disponibilizada no P4.' })
+      ? aviso({ tipo: 'info', texto: 'Este servidor ainda não permite alterar o plano confirmado.' })
       : botao({ texto: 'Adicionar medicamento', icone: 'mais', variante: 'secundario', foco: 'adicionar', aoClicar: adicionar });
 
     return h('section', { class: 'tela' },
