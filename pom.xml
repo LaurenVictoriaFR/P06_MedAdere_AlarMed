@@ -101,7 +101,7 @@
         <resources>
             <resource><directory>src/main/resources</directory></resource>
             <resource><directory>frontend</directory><targetPath>static</targetPath>
-                <excludes><exclude>tests/**</exclude><exclude>package.json</exclude><exclude>servidor.mjs</exclude><exclude>*.md</exclude></excludes>
+                <excludes><exclude>tests/**</exclude><exclude>node_modules/**</exclude><exclude>package.json</exclude><exclude>package-lock.json</exclude><exclude>eslint.config.js</exclude><exclude>servidor.mjs</exclude><exclude>*.md</exclude></excludes>
             </resource>
         </resources>
 		<plugins>

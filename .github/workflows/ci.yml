@@ -26,8 +26,9 @@ jobs:
           path: target/alarmed-*.jar
           if-no-files-found: error
 
-  # Testes do front-end (regras de domínio e contraste do RNF001).
-  # Roda em paralelo com o back-end; não instala dependências.
+  # Front-end: linter (ESLint, TD-07) e testes (regras de domínio, adaptador
+  # HTTP, service worker e contraste do RNF001). Roda em paralelo com o back-end.
+  # O ESLint é a única dependência, e só de desenvolvimento.
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -38,5 +39,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Dependências de desenvolvimento
+        run: npm ci
+      - name: Linter do front-end
+        run: npm run lint
       - name: Testes do front-end
         run: node --test
