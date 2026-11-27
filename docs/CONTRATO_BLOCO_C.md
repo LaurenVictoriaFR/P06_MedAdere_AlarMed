@@ -41,13 +41,15 @@ v2 (EM_EDICAO ou EM_REVISAO) --cancelarAlteracao()--> v2 apagada; v1 segue valen
 | GET /planos/rascunho | Já existente. Devolve também a alteração pendente (`planoAnteriorId` preenchido) | PlanoResponse; 404 sem rascunho |
 | POST /planos/{idNovo}/itens | Já existente: adicionar item | PlanoResponse |
 | DELETE /planos/{idNovo}/itens/{itemId} | Já existente: remover item | PlanoResponse |
-| PUT /planos/{idNovo}/itens/{itemId} | **Opcional (BL-06)**: editar item no lugar, mesmo corpo do POST de itens. Só em EM_EDICAO | PlanoResponse |
+| PUT /planos/{idNovo}/itens/{itemId} | BL-06: editar item no lugar, mesmo corpo do POST de itens. Só em EM_EDICAO. Mantém `id`, `itemOrigemId`, `inicioTratamento` e a foto | PlanoResponse |
 | POST /planos/{idNovo}/revisar | Já existente (UC-08) | PlanoResponse |
 | POST /planos/{idNovo}/editar | Já existente (UC-08 A1 / UC-04 A4) | PlanoResponse |
 | POST /planos/{idNovo}/confirmar | Já existente. Na alteração, também encerra a versão anterior | PlanoResponse |
 | DELETE /planos/{idNovo} | Já existente; na alteração é o `cancelarAlteracao()` (UC-04 A3) | 204 |
 
-Sem o BL-06, editar um item continua sendo remover e adicionar (como o P07 já faz).
+Com o BL-06, o P07 pode editar o item no lugar em vez de remover e adicionar: a cópia
+continua ligada ao item original (`itemOrigemId`) e o "desfazer" não perde essa ligação.
+A rota vale também no primeiro cadastro.
 
 ### Campos novos
 
@@ -63,6 +65,7 @@ ItemDoPlanoResponse:
 | --- | --- | --- |
 | itemOrigemId | UUID ou null | Item do plano anterior de onde a cópia veio; null para item novo. Use para comparar confirmado × pendente (o `id` da cópia é outro) |
 | inicioTratamento | data ou null | Início da contagem da duração deste item. Cópia (e item editado pelo BL-06) mantém a data do original; item novo recebe a data da confirmação. null antes de confirmar |
+| observacao | texto ou null | Observação livre da receita (ex.: "tomar em jejum"), até 500 caracteres. Opcional no POST/PUT do item; a cópia da alteração mantém |
 | temFoto | boolean | Item tem foto da caixa (RF008) |
 
 ### Doses ao confirmar a alteração (DM09, ADR-10, resposta à Q-01 / QS-13)
@@ -100,8 +103,8 @@ paciente (TD-08). O `GET /planos/rascunho` passa a consultar pelo service (QP-07
 
 ## RF008 — Foto da caixa (DA-02, BL-07)
 
-Primeiro item a cortar se atrasar (Plano de Divisão do P4, seção 4). Cortado,
-`temFoto` vem sempre `false`.
+Implementado. (Era o primeiro item a cortar se atrasasse, pelo Plano de Divisão do P4,
+seção 4.)
 
 | Método e rota | Função |
 | --- | --- |
@@ -120,3 +123,23 @@ Decisão da DA-02:
   Num plano confirmado, a foto entra por `/alteracao` e passa pela revisão.
 - **Na alteração:** a cópia do item mantém a foto do original.
 - **Acesso:** só o paciente dono do plano (404 para outro, QS-06).
+- **Na resposta do GET:** `Cache-Control: no-store` (é dado de saúde) e
+  `X-Content-Type-Options: nosniff`. O front pode usar a rota direto num `<img src>`:
+  o cookie da sessão vai junto.
+
+| Situação | Resposta |
+| --- | --- |
+| Arquivo vazio, maior que 2 MB ou que não é JPEG/PNG/WebP pelo conteúdo | 400 com `mensagem` |
+| Sem o campo `arquivo`, ou corpo que não é multipart | 400 |
+| PUT/DELETE com o plano fora de EM_EDICAO | 409 |
+| GET de item sem foto | 404 |
+| Plano ou item de outro paciente, ou inexistente | 404 |
+| DELETE de item sem foto | 204 (não faz nada) |
+
+Exemplo no front:
+
+```js
+const corpo = new FormData();
+corpo.append('arquivo', arquivoReduzido); // Blob/File de até 2 MB
+await fetch(`/planos/${planoId}/itens/${itemId}/foto`, { method: 'PUT', body: corpo, credentials: 'same-origin' });
+```

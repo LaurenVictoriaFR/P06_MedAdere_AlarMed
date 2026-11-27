@@ -28,6 +28,20 @@ public class TratadorGlobalDeExcecoes {
                 .body(ErroResposta.de("Os dados mudaram durante a operação. Atualize e tente novamente."));
     }
 
+    // dado que a validacao do corpo nao cobre (ex.: arquivo da foto) -> 400
+    @ExceptionHandler(DadosInvalidosException.class)
+    public ResponseEntity<ErroResposta> tratarDadosInvalidos(DadosInvalidosException ex) {
+        return ResponseEntity.badRequest().body(ErroResposta.de(ex.getMessage()));
+    }
+
+    // foto da caixa (RF008): faltou o arquivo, nao veio multipart ou passou do limite do upload -> 400
+    @ExceptionHandler({org.springframework.web.multipart.MultipartException.class,
+            org.springframework.web.multipart.support.MissingServletRequestPartException.class})
+    public ResponseEntity<ErroResposta> tratarArquivo(Exception ex) {
+        return ResponseEntity.badRequest()
+                .body(ErroResposta.de("Envie a foto em JPEG, PNG ou WebP, com até 2 MB, no campo \"arquivo\"."));
+    }
+
     // regra de negocio quebrada -> 409
     @ExceptionHandler(RegraNegocioException.class)
     public ResponseEntity<ErroResposta> tratarRegraNegocio(RegraNegocioException ex) {

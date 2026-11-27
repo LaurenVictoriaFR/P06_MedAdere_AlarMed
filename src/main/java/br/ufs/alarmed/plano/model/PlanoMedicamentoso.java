@@ -91,7 +91,7 @@ public class PlanoMedicamentoso {
     // nova em EM_EDICAO, que segue o mesmo caminho acima. O confirmado continua valendo
     // ate a versao nova ser confirmada; ai ele passa por encerrarPlano() -> ENCERRADO.
     //
-    // Itens so podem ser adicionados ou removidos em EM_EDICAO. Assim, qualquer
+    // Itens (e a foto deles) so podem ser adicionados, editados ou removidos em EM_EDICAO. Assim, qualquer
     // mudanca depois da revisao obriga o plano a voltar e ser revisado de novo.
     // ---------------------------------------------------------------
 
@@ -109,6 +109,34 @@ public class PlanoMedicamentoso {
         if (!removeu) {
             throw new RecursoNaoEncontradoException("Medicamento não encontrado neste plano.");
         }
+    }
+
+    // BL-06 / UC-04 passo 4: corrige um medicamento no lugar, sem remover e adicionar de novo.
+    // `dados` e um item montado so pra trazer os campos novos (o construtor ja validou).
+    public void atualizarItem(UUID itemId, ItemDoPlano dados) {
+        Objects.requireNonNull(dados, "dados");
+        exigirSituacao(SituacaoPlano.EM_EDICAO, "Só é possível editar medicamentos com o plano em edição.");
+        buscarItem(itemId).receberDados(dados);
+    }
+
+    // RF008: a foto e parte do item, entao segue a mesma regra (so em EM_EDICAO, MOD-03).
+    // Num plano confirmado, a foto muda pela alteracao e passa pela revisao.
+    public void definirFotoDoItem(UUID itemId, FormatoImagem formato) {
+        exigirSituacao(SituacaoPlano.EM_EDICAO, "Só é possível mudar a foto com o plano em edição.");
+        buscarItem(itemId).definirFoto(formato);
+    }
+
+    public void removerFotoDoItem(UUID itemId) {
+        exigirSituacao(SituacaoPlano.EM_EDICAO, "Só é possível mudar a foto com o plano em edição.");
+        buscarItem(itemId).removerFoto();
+    }
+
+    // acha o item pelo id; 404 se ele nao for deste plano
+    public ItemDoPlano buscarItem(UUID itemId) {
+        return itens.stream()
+                .filter(item -> item.getId() != null && item.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Medicamento não encontrado neste plano."));
     }
 
     // UC-01 passo 6: manda o plano completo pra revisao (UC-08)

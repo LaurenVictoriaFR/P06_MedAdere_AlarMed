@@ -4,16 +4,22 @@ import br.ufs.alarmed.plano.dto.ItemDoPlanoRequest;
 import br.ufs.alarmed.plano.dto.PlanoResponse;
 import br.ufs.alarmed.plano.service.PlanoMedicamentosoService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.UUID;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 // Endpoints do cadastro e da alteracao do plano medicamentoso (UC-01, UC-04, UC-08).
 // Contrato em docs/CONTRATO_BLOCO_C.md.
@@ -66,6 +72,40 @@ public class PlanoMedicamentosoController {
     @PostMapping("/{planoId}/itens")
     public PlanoResponse adicionarItem(@PathVariable UUID planoId, @Valid @RequestBody ItemDoPlanoRequest request) {
         return planoService.adicionarItem(planoId, request);
+    }
+
+    // BL-06 / UC-04 passo 4: edita o medicamento no lugar (mesmo corpo do POST de itens)
+    @PutMapping("/{planoId}/itens/{itemId}")
+    public PlanoResponse atualizarItem(@PathVariable UUID planoId, @PathVariable UUID itemId,
+                                       @Valid @RequestBody ItemDoPlanoRequest request) {
+        return planoService.atualizarItem(planoId, itemId, request);
+    }
+
+    // RF008: grava ou troca a foto da caixa (multipart, campo "arquivo"). JPEG, PNG ou WebP, ate 2 MB.
+    @PutMapping(path = "/{planoId}/itens/{itemId}/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> salvarFoto(@PathVariable UUID planoId, @PathVariable UUID itemId,
+                                           @RequestParam("arquivo") MultipartFile arquivo) throws IOException {
+        planoService.salvarFoto(planoId, itemId, arquivo.getBytes());
+        return ResponseEntity.noContent().build();
+    }
+
+    // RF008: devolve a imagem com o tipo original. Dado de saude: o navegador nao guarda em cache,
+    // e nosniff impede que o arquivo seja interpretado como outra coisa alem de imagem.
+    @GetMapping("/{planoId}/itens/{itemId}/foto")
+    public ResponseEntity<byte[]> buscarFoto(@PathVariable UUID planoId, @PathVariable UUID itemId) {
+        PlanoMedicamentosoService.FotoDoItem foto = planoService.buscarFoto(planoId, itemId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(foto.tipo()))
+                .cacheControl(CacheControl.noStore())
+                .header("X-Content-Type-Options", "nosniff")
+                .body(foto.conteudo());
+    }
+
+    // RF008: tira a foto do medicamento
+    @DeleteMapping("/{planoId}/itens/{itemId}/foto")
+    public ResponseEntity<Void> removerFoto(@PathVariable UUID planoId, @PathVariable UUID itemId) {
+        planoService.removerFoto(planoId, itemId);
+        return ResponseEntity.noContent().build();
     }
 
     // tira um medicamento do plano
