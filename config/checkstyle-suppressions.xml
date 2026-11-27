@@ -51,7 +51,6 @@
   <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]service[\\/]ProcessadorLembrete[.]java" checks=".*"/>
   <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]notificacao[\\/]service[\\/]WebPushEmissor[.]java" checks=".*"/>
   <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]controller[\\/]PlanoMedicamentosoController[.]java" checks=".*"/>
-  <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]controller[\\/]RascunhoController[.]java" checks=".*"/>
   <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]dto[\\/]ItemDoPlanoRequest[.]java" checks=".*"/>
   <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]dto[\\/]ItemDoPlanoResponse[.]java" checks=".*"/>
   <suppress files="src[\\/]main[\\/]java[\\/]br[\\/]ufs[\\/]alarmed[\\/]plano[\\/]dto[\\/]PlanoResponse[.]java" checks=".*"/>

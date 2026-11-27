@@ -21,7 +21,8 @@ public class TratadorGlobalDeExcecoes {
     }
 
     @ExceptionHandler({org.springframework.dao.DataIntegrityViolationException.class,
-            org.springframework.dao.PessimisticLockingFailureException.class})
+            org.springframework.dao.PessimisticLockingFailureException.class,
+            org.springframework.dao.OptimisticLockingFailureException.class})
     public ResponseEntity<ErroResposta> tratarConflito(Exception ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErroResposta.de("Os dados mudaram durante a operação. Atualize e tente novamente."));

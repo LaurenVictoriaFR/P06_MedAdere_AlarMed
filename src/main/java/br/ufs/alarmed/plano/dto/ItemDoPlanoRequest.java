@@ -38,6 +38,7 @@ public record ItemDoPlanoRequest(
 
         @NotBlank(message = "Informe a duração do tratamento ou \"uso contínuo\".")
         @Size(max = 60, message = "A duração do tratamento pode ter no máximo 60 caracteres.")
+        @DuracaoValida
         String duracaoTratamento,
 
         @NotEmpty(message = "Informe ao menos um horário.")

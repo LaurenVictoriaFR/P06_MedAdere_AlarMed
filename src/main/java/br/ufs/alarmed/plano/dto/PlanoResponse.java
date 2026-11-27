@@ -17,6 +17,8 @@ public record PlanoResponse(
         Instant confirmadoEm,
         String fusoHorario,
         SituacaoPlano situacao,
+        // UC-04: na alteracao pendente, o plano confirmado que ela substitui; null no cadastro
+        UUID planoAnteriorId,
         List<ItemDoPlanoResponse> itens) {
 
     // converte a entidade na resposta
@@ -32,6 +34,7 @@ public record PlanoResponse(
                 plano.getConfirmadoEm(),
                 plano.getFusoHorario(),
                 plano.getSituacao(),
+                plano.getPlanoAnteriorId(),
                 itens);
     }
 }

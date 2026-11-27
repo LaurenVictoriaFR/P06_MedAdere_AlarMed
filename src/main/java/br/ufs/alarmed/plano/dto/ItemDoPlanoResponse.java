@@ -2,12 +2,13 @@ package br.ufs.alarmed.plano.dto;
 
 import br.ufs.alarmed.plano.model.HorarioProgramado;
 import br.ufs.alarmed.plano.model.ItemDoPlano;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
 // O que a API devolve pra cada medicamento do plano.
-// fotoCaixa fica de fora: so entra no P4 (RF008).
+// A foto nao vem aqui (RF008): temFoto so diz se existe; a imagem tem rota propria.
 public record ItemDoPlanoResponse(
         UUID id,
         String nomeMedicamento,
@@ -15,7 +16,12 @@ public record ItemDoPlanoResponse(
         String viaAdministracao,
         String frequencia,
         String duracaoTratamento,
-        List<LocalTime> horarios) {
+        List<LocalTime> horarios,
+        // UC-04: item do plano anterior de onde a copia veio; null pra item novo
+        UUID itemOrigemId,
+        // inicio da contagem da duracao; null antes de confirmar
+        LocalDate inicioTratamento,
+        boolean temFoto) {
 
     // converte a entidade na resposta
     public static ItemDoPlanoResponse de(ItemDoPlano item) {
@@ -30,6 +36,9 @@ public record ItemDoPlanoResponse(
                 item.getViaAdministracao(),
                 item.getFrequencia(),
                 item.getDuracaoTratamento(),
-                horas);
+                horas,
+                item.getItemOrigemId(),
+                item.getInicioTratamento(),
+                item.getFotoCaixa() != null);
     }
 }

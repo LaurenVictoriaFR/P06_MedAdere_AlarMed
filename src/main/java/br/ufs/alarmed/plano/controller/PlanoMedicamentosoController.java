@@ -5,6 +5,7 @@ import br.ufs.alarmed.plano.dto.PlanoResponse;
 import br.ufs.alarmed.plano.service.PlanoMedicamentosoService;
 import jakarta.validation.Valid;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// Endpoints do cadastro do plano medicamentoso (UC-01, UC-08).
+// Endpoints do cadastro e da alteracao do plano medicamentoso (UC-01, UC-04, UC-08).
+// Contrato em docs/CONTRATO_BLOCO_C.md.
 // Quem e o paciente vem do ContextoPaciente, resolvido dentro do service.
 @RestController
 @RequestMapping("/planos")
@@ -37,6 +39,21 @@ public class PlanoMedicamentosoController {
     @GetMapping("/atual")
     public PlanoResponse buscarPlanoAtual() {
         return planoService.buscarPlanoAtual();
+    }
+
+    // cadastro ou alteracao em andamento, pro front retomar (404 se nao tiver)
+    @GetMapping("/rascunho")
+    public PlanoResponse buscarRascunho() {
+        return planoService.buscarRascunho();
+    }
+
+    // UC-04 (SD04 iniciarAlteracao): abre a versao em edicao do plano confirmado.
+    // 201 quando cria a versao, 200 quando retoma uma que ja estava aberta.
+    @PostMapping("/{planoId}/alteracao")
+    public ResponseEntity<PlanoResponse> iniciarAlteracao(@PathVariable UUID planoId) {
+        PlanoMedicamentosoService.AlteracaoIniciada resultado = planoService.iniciarAlteracao(planoId);
+        HttpStatus status = resultado.criada() ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(resultado.plano());
     }
 
     // consulta o plano, usado pela tela de edicao e pela de revisao (P02)
@@ -75,7 +92,7 @@ public class PlanoMedicamentosoController {
         return planoService.confirmarPlano(planoId);
     }
 
-    // desiste do cadastro, enquanto ele ainda nao foi confirmado
+    // desiste do cadastro ou da alteracao (UC-04 A3), enquanto nao foi confirmado
     @DeleteMapping("/{planoId}")
     public ResponseEntity<Void> cancelarCadastro(@PathVariable UUID planoId) {
         planoService.cancelarCadastro(planoId);

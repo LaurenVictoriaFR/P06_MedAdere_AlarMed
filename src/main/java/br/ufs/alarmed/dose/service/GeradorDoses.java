@@ -36,7 +36,9 @@ public class GeradorDoses {
         LocalDate de = plano.getGeradoAte() == null ? plano.getDataInicio() : plano.getGeradoAte().plusDays(1);
         if (de.isAfter(ate)) return;
         for (ItemDoPlano item : plano.getItens()) {
-            LocalDate fim = DuracaoTratamento.fim(item.getDuracaoTratamento(), plano.getDataInicio());
+            // UC-04: item copiado numa alteracao conta a duracao do inicio original
+            LocalDate inicioItem = item.getInicioTratamento() != null ? item.getInicioTratamento() : plano.getDataInicio();
+            LocalDate fim = DuracaoTratamento.fim(item.getDuracaoTratamento(), inicioItem);
             if (plano.getDataFim() != null && (fim == null || plano.getDataFim().isBefore(fim))) fim = plano.getDataFim();
             List<LocalTime> horarios = item.getHorarios().stream().map(HorarioProgramado::getHora).sorted().toList();
             for (LocalDate dia = de; !dia.isAfter(ate) && (fim == null || !dia.isAfter(fim)); dia = dia.plusDays(1)) {
