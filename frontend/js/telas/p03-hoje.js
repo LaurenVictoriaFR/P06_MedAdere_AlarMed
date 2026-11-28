@@ -194,20 +194,26 @@ function cartaoLembretes(ctx) {
   });
 }
 
-// Resumo do dia, embaixo do título. Ex.: "3 doses hoje: 1 tomada, 0 não tomadas declaradas, ..."
+// Junta uma lista em português: ["a"] → "a"; ["a", "b", "c"] → "a, b e c".
+function juntarComE(partes) {
+  if (partes.length <= 1) return partes.join('');
+  return `${partes.slice(0, -1).join(', ')} e ${partes.at(-1)}`;
+}
+
+// Resumo do dia, embaixo do título. Ex.: "3 doses hoje: 1 tomada e 2 a registrar."
 function textoResumo(r) {
   if (r.total === 0) return 'Nenhuma dose para registrar hoje.';
 
-  const partes = [
-    plural(r.tomadas, 'tomada', 'tomadas'),
-    plural(r.naoTomadas, 'não tomada declarada', 'não tomadas declaradas'),
-    plural(r.semConfirmacao, 'sem confirmação', 'sem confirmação'),
-  ];
+  // Só entram as contagens maiores que zero, para a frase ficar curta.
+  const partes = [];
+  if (r.tomadas) partes.push(plural(r.tomadas, 'tomada', 'tomadas'));
+  if (r.naoTomadas) partes.push(plural(r.naoTomadas, 'não tomada declarada', 'não tomadas declaradas'));
+  if (r.semConfirmacao) partes.push(plural(r.semConfirmacao, 'sem confirmação', 'sem confirmação'));
   // Pendentes e programadas ainda podem ser registradas.
   const abertas = r.pendentes + r.programadas;
   if (abertas) partes.push(`${abertas} a registrar`);
 
-  return `${plural(r.total, 'dose', 'doses')} hoje: ${partes.join(', ')}.`;
+  return `${plural(r.total, 'dose', 'doses')} hoje: ${juntarComE(partes)}.`;
 }
 
 // No dia em que o plano é confirmado, os horários anteriores à confirmação não viram dose.

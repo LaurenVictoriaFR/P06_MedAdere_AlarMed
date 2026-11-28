@@ -1,17 +1,33 @@
 {
+  "id": "./",
   "name": "AlarMed",
   "short_name": "AlarMed",
-  "description": "Seus remédios no horário certo.",
+  "description": "Lembretes no horário de cada remédio e registro das doses tomadas.",
   "lang": "pt-BR",
+  "dir": "ltr",
   "start_url": "./#/hoje",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#F5EFE5",
   "theme_color": "#F5EFE5",
+  "categories": ["health", "medical"],
   "icons": [
     { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Doses de hoje",
+      "short_name": "Hoje",
+      "url": "./#/hoje",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Painel do mês",
+      "short_name": "Painel",
+      "url": "./#/painel",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }

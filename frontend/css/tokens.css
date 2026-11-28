@@ -39,6 +39,8 @@
   --pendente-texto: #7A4300;
   --programada-fundo: #E8ECEA;
   --programada-texto: #3E4A44;
+  --sem-confirmacao-fundo: #ECE8F4;  /* lilás: diferente de Programada (cinza) e de Não tomada (vermelho) */
+  --sem-confirmacao-texto: #4A3F6B;
   --info-fundo: #E2ECF6;
   --info-texto: #1F4E79;
 
